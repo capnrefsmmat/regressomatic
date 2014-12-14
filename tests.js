@@ -9,14 +9,14 @@ var pts = [[30, 30],
            [382, 292],
            [401, 342]];
 
-QUnit.test("regression parameters", function(assert) {
+QUnit.test("Regression parameters", function(assert) {
     var r = regress(pts, 0, 100, false);
     assert.close(r[0], 0.703, 0.1, "Slope");
 
     assert.close(r[1], 35.24, 0.1, "Intercept");
 });
 
-QUnit.test("residuals", function(assert) {
+QUnit.test("Residuals", function(assert) {
     var resid = regress(pts, 0, 100, "residuals")[4];
 
     // Check just a few of the residuals
@@ -24,7 +24,7 @@ QUnit.test("residuals", function(assert) {
     assert.close(resid[4], -14.13, 0.1, "residual 4");
 });
 
-QUnit.test("standardized residuals", function(assert) {
+QUnit.test("Standardized residuals", function(assert) {
     var resid = regress(pts, 0, 100, "rstandard")[4];
 
     // Check just a few of the residuals

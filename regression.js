@@ -190,17 +190,16 @@ function ones(n) {
 // array.slice() doesn't do a deep copy, so we need this instead
 // from http://stackoverflow.com/a/25100784
 function deepClone(arr) {
-  var len = arr.length;
-  var newArr = new Array(len);
-  for (var i = 0; i < len; i++) {
-    if (Array.isArray(arr[i])) {
-      newArr[i] = deepClone(arr[i]);
+    var len = arr.length;
+    var newArr = new Array(len);
+    for (var i = 0; i < len; i++) {
+        if (Array.isArray(arr[i])) {
+            newArr[i] = deepClone(arr[i]);
+        } else {
+            newArr[i] = arr[i];
+        }
     }
-    else {
-      newArr[i] = arr[i];
-    }
-  }
-  return newArr;
+    return newArr;
 }
 
 function regress(data, minX, maxX, diagnostics) {
