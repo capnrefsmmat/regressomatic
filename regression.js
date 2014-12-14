@@ -130,14 +130,13 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .attr("transform", "translate(0, " + (opts.height - opts.padding + 5) + ")")
         .call(xAxis);
 
+    var residRange = 1.5 * d3.max(r[4].map(Math.abs));
     if (diagnostic === "cooks") {
         var ryScale = d3.scale.linear()
-                              .domain([1.2, 0])
+                              .domain([residRange, 0])
                               .range([opts.padding, opts.height - opts.padding])
                               .nice();
     } else {
-        var residRange = 1.5 * d3.max(r[4].map(Math.abs));
-    
         var ryScale = d3.scale.linear()
                               .domain([residRange, -residRange])
                               .range([opts.padding, opts.height - opts.padding])
@@ -148,7 +147,7 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
                        .orient("left")
                        .ticks(4);
     rsvg.append("g")
-        .attr("class", "axis")
+        .attr("class", "axis ry")
         .attr("transform", "translate(" + opts.padding + ", 0)")
         .call(ryAxis);
 
