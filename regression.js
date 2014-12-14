@@ -4,6 +4,7 @@
 // - "residuals" for ordinary residuals
 // - "rstandard" for standardized residuals
 // - "cooks" for Cook's distances
+// - "leverage" for leverage (diagonal of hat matrix)
 function regressionPlots(regression, resid, data, opts, diagnostic) {    
     // Scales
     var xScale = d3.scale.linear()
@@ -131,7 +132,7 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .call(xAxis);
 
     var residRange = 1.5 * d3.max(r[4].map(Math.abs));
-    if (diagnostic === "cooks") {
+    if (diagnostic === "cooks" || diagnostic === "leverage") {
         var ryScale = d3.scale.linear()
                               .domain([residRange, 0])
                               .range([opts.padding, opts.height - opts.padding])
@@ -151,8 +152,8 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .attr("transform", "translate(" + opts.padding + ", 0)")
         .call(ryAxis);
 
-    // Horizontal line at y = 0. Not needed for Cook's distance plots
-    if (diagnostic !== "cooks") {
+    // Horizontal line at y = 0. Not needed for Cook's distance and leverage
+    if (diagnostic !== "cooks" && diagnostic !== "leverage") {
         rsvg.append("line")
             .attr("x1", xScale(minX))
             .attr("x2", xScale(maxX))
@@ -222,6 +223,8 @@ function regress(data, minX, maxX, diagnostics) {
         residuals = rstandard(residuals, hat);
     } else if (diagnostics === "cooks") {
         residuals = cooks(rstandard(residuals, hat), hat);
+    } else if (diagnostics === "leverage") {
+        residuals = leverage(hat);
     }
     
     return [slope, intercept, intercept + slope * minX,
@@ -241,9 +244,15 @@ function rstandard(residuals, hat) {
     });
 }
 
+// Calculate Cook's distance. Pass residuals as a Vector and the hat matrix.
 function cooks(residuals, hat) {
     return residuals.map(function(r, i) {
         var hii = hat.e(i, i);
         return Math.pow(r, 2) * hii / (1 - hii) / 2;
     });
+}
+
+// Extract the leverage from the hat matrix, returning a Vector.
+function leverage(hat) {
+    return hat.diagonal();
 }
