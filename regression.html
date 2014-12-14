@@ -37,7 +37,7 @@
       </tr>
     </table>
 
-    <p>Finally, let's try Cook's distances. These measure how much the model parameters change if each data point is omitted in turn.</p>
+    <p>Finally, let's try Cook's distances. The Cook's distance of a data point measures how much the model parameters would change if that point were removed, so it is a very intuitive measure of influence. Notice that if you vertically displace a point near the middle of the line, the distance won't pass 0.6 no matter how hard you try, while a point at either end of the line can easily have a distance over 1.</p>
 
     <table>
       <tr>
