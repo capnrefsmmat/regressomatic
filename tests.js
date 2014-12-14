@@ -18,7 +18,7 @@ QUnit.test("regression parameters", function(assert) {
 });
 
 QUnit.test("residuals", function(assert) {
-    var resid = regress(pts, 0, 100, false)[4];
+    var resid = regress(pts, 0, 100, "residuals")[4];
     
     // Check just a few of the residuals
     assert.close(resid[0], -26.34, 0.1, "residual 0");
@@ -26,9 +26,16 @@ QUnit.test("residuals", function(assert) {
 });
 
 QUnit.test("standardized residuals", function(assert) {
-    var resid = regress(pts, 0, 100, true)[4];
+    var resid = regress(pts, 0, 100, "rstandard")[4];
     
     // Check just a few of the residuals
     assert.close(resid[0], -1.359, 0.01, "residual 0");
     assert.close(resid[4], -0.66, 0.01, "residual 4");
+});
+
+QUnit.test("Cook's distances", function(assert) {
+    var resid = regress(pts, 0, 100, "cooks")[4];
+
+    assert.close(resid[0], 0.387, 0.01, "Cook's distance 0");
+    assert.close(resid[4], 0.037, 0.01, "Cook's distance 4");
 });

@@ -8,3 +8,5 @@ coef(m)
 resid(m)[c(1,5)]
 
 rstandard(m)[c(1,5)]
+
+cooks.distance(m)[c(1,5)]

@@ -3,6 +3,7 @@
 // diagnostic can be:
 // - "residuals" for ordinary residuals
 // - "rstandard" for standardized residuals
+// - "cooks" for Cook's distances
 function regressionPlots(regression, resid, data, opts, diagnostic) {    
     // Scales
     var xScale = d3.scale.linear()
@@ -70,11 +71,7 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
           .attr("cy", my);
 
         var pts = regression.selectAll("circle").data();        
-        if (diagnostic === "residuals") {
-            var r = regress(pts, minX, maxX, false);
-        } else if (diagnostic === "rstandard") {
-            var r = regress(pts, minX, maxX, true);
-        }
+        var r = regress(pts, minX, maxX, diagnostic);
        
         svg.select("line")
            .attr("x1", xScale(minX))
@@ -93,13 +90,8 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
     }
 
     // Draw data
-    if (diagnostic === "residuals") {
-        var r = regress(data, xScale.invert(opts.padding),
-                        xScale.invert(opts.width - opts.padding), false);
-    } else if (diagnostic === "rstandard") {
-        var r = regress(data, xScale.invert(opts.padding),
-                        xScale.invert(opts.width - opts.padding), true);
-    }
+    var r = regress(data, xScale.invert(opts.padding),
+                    xScale.invert(opts.width - opts.padding), diagnostic);
     
     svg.append("line")
        .attr("x1", xScale(minX))
@@ -138,12 +130,19 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .attr("transform", "translate(0, " + (opts.height - opts.padding + 5) + ")")
         .call(xAxis);
 
-    var residRange = 1.5 * d3.max(r[4].map(Math.abs));
+    if (diagnostic === "cooks") {
+        var ryScale = d3.scale.linear()
+                              .domain([1.2, 0])
+                              .range([opts.padding, opts.height - opts.padding])
+                              .nice();
+    } else {
+        var residRange = 1.5 * d3.max(r[4].map(Math.abs));
     
-    var ryScale = d3.scale.linear()
-                          .domain([residRange, -residRange])
-                          .range([opts.padding, opts.height - opts.padding])
-                          .nice();
+        var ryScale = d3.scale.linear()
+                              .domain([residRange, -residRange])
+                              .range([opts.padding, opts.height - opts.padding])
+                              .nice();
+    }
     var ryAxis = d3.svg.axis()
                        .scale(ryScale)
                        .orient("left")
@@ -153,14 +152,15 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .attr("transform", "translate(" + opts.padding + ", 0)")
         .call(ryAxis);
 
-    // Horizontal line at y = 0
-    rsvg.append("line")
-        .attr("x1", xScale(minX))
-        .attr("x2", xScale(maxX))
-        .attr("y1", ryScale(0))
-        .attr("y2", ryScale(0))
-        .attr("class", "rline");
-     
+    // Horizontal line at y = 0. Not needed for Cook's distance plots
+    if (diagnostic !== "cooks") {
+        rsvg.append("line")
+            .attr("x1", xScale(minX))
+            .attr("x2", xScale(maxX))
+            .attr("y1", ryScale(0))
+            .attr("y2", ryScale(0))
+            .attr("class", "rline");
+    }
     var residData = data.map(function(d, i) {
         return [d[0], r[4][i]];
     });
@@ -203,26 +203,26 @@ function deepClone(arr) {
   return newArr;
 }
 
-function regress(data, minX, maxX, standardize) {
-    if (typeof(standardize) === "undefined") { 
-        standardize = false; 
-    }
+function regress(data, minX, maxX, diagnostics) {
+    diagnostics = diagnostics || "residuals";
     
     var X = ones(data.length).augment($M(data).col(1));
     var Y = $M(data).minor(1, 2, data.length, 1);
-    
+
     var S = X.transpose().multiply(X).inverse().multiply(X.transpose());
-    
+
     var hat = X.multiply(S);
     var beta = S.multiply(Y);
-    
+
     var intercept = beta.e(1, 1);
     var slope = beta.e(2, 1);
-    
+
     var residuals = Matrix.I(data.length).subtract(hat).multiply(Y).col(1);
-   
-    if (standardize) {
+
+    if (diagnostics === "rstandard") {
         residuals = rstandard(residuals, hat);
+    } else if (diagnostics === "cooks") {
+        residuals = cooks(rstandard(residuals, hat), hat);
     }
     
     return [slope, intercept, intercept + slope * minX,
@@ -239,5 +239,12 @@ function rstandard(residuals, hat) {
     var s2 = sigmahat(residuals);
     return residuals.map(function(r, i) { 
         return r / Math.sqrt(s2 * (1 - hat.e(i, i))); 
+    });
+}
+
+function cooks(residuals, hat) {
+    return residuals.map(function(r, i) {
+        var hii = hat.e(i, i);
+        return Math.pow(r, 2) * hii / (1 - hii) / 2;
     });
 }

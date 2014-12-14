@@ -37,6 +37,20 @@
       </tr>
     </table>
 
+    <p>Finally, let's try Cook's distances. These measure how much the model parameters change if each data point is omitted in turn.</p>
+
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>Cook's distances</th>
+      </tr>
+      <tr>
+        <td id="regression3"></td>
+
+        <td id="residuals3"></td>
+      </tr>
+    </table>
+
     <script>
      // Data and setup
      var pts = [[30, 30],
@@ -66,6 +80,9 @@
 
      regressionPlots(d3.select("#regression2"), d3.select("#residuals2"),
                      deepClone(pts), opts, "rstandard");
+
+     regressionPlots(d3.select("#regression3"), d3.select("#residuals3"),
+                     deepClone(pts), opts, "cooks");
     </script>
 
   </body>
