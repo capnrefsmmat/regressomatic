@@ -21,6 +21,9 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
                       .orient("left")
                       .ticks(4);
 
+    var minX = xScale.invert(opts.padding);
+    var maxX = xScale.invert(opts.width - opts.padding);
+    
     // Mouse behaviors
     var drag = d3.behavior.drag()
                           .origin(function(d) { return {x: xScale(d[0]), y: yScale(d[1])}; })
@@ -58,18 +61,16 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
           .attr("cx", mx)
           .attr("cy", my);
 
-        var pts = regression.selectAll("circle").data();
+        var pts = regression.selectAll("circle").data();        
         if (diagnostic === "residuals") {
-            var r = regress(pts, xScale.invert(opts.padding),
-                            xScale.invert(opts.width - opts.padding), false);
+            var r = regress(pts, minX, maxX, false);
         } else if (diagnostic === "rstandard") {
-            var r = regress(pts, xScale.invert(opts.padding),
-                            xScale.invert(opts.width - opts.padding), true);
+            var r = regress(pts, minX, maxX, true);
         }
        
         svg.select("line")
-           .attr("x1", xScale(r[0]))
-           .attr("x2", xScale(r[1]))
+           .attr("x1", xScale(minX))
+           .attr("x2", xScale(maxX))
            .attr("y1", yScale(r[2]))
            .attr("y2", yScale(r[3]));
 
@@ -97,8 +98,8 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
                         .attr("height", opts.height);
 
     svg.append("line")
-       .attr("x1", xScale(r[0]))
-       .attr("x2", xScale(r[1]))
+       .attr("x1", xScale(minX))
+       .attr("x2", xScale(maxX))
        .attr("y1", yScale(r[2]))
        .attr("y2", yScale(r[3]))
        .attr("class", "rline");
@@ -154,8 +155,8 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
 
      // Horizontal line at y = 0
     rsvg.append("line")
-        .attr("x1", xScale(r[0]))
-        .attr("x2", xScale(r[1]))
+        .attr("x1", xScale(minX))
+        .attr("x2", xScale(maxX))
         .attr("y1", ryScale(0))
         .attr("y2", ryScale(0))
         .attr("class", "rline");
@@ -179,12 +180,19 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .on("mouseout", dataHoverOut);
 }
 
+// make a column Matrix of ones
+function ones(n) {
+    var elements = [];
+    while (n--) { elements.push([1]); }
+    return $M(elements);
+}
+
 function regress(data, minX, maxX, standardize) {
     if (typeof(standardize) === "undefined") { 
         standardize = false; 
     }
     
-    var X = $M(data).minor(1, 1, data.length, 1);
+    var X = ones(data.length).augment($M(data).col(1));
     var Y = $M(data).minor(1, 2, data.length, 1);
     
     var S = X.transpose().multiply(X).inverse().multiply(X.transpose());
@@ -192,8 +200,8 @@ function regress(data, minX, maxX, standardize) {
     var hat = X.multiply(S);
     var beta = S.multiply(Y);
     
-    var intercept = beta.e(2, 1);
-    var slope = beta.e(1, 1);
+    var intercept = beta.e(1, 1);
+    var slope = beta.e(2, 1);
     
     var residuals = Matrix.I(data.length).subtract(hat).multiply(Y).col(1);
    
@@ -201,7 +209,7 @@ function regress(data, minX, maxX, standardize) {
         residuals = rstandard(residuals, hat);
     }
     
-    return [minX, maxX, intercept + slope * minX,
+    return [slope, intercept, intercept + slope * minX,
             intercept + slope * maxX, residuals.elements];
 }
 
@@ -214,6 +222,6 @@ function sigmahat(residuals) {
 function rstandard(residuals, hat) {
     var s2 = sigmahat(residuals);
     return residuals.map(function(r, i) { 
-        return r / Math.sqrt(s2 * (1 - hat.e(i + 1, i + 1))); 
+        return r / Math.sqrt(s2 * (1 - hat.e(i, i))); 
     });
 }
