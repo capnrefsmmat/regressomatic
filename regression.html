@@ -65,7 +65,7 @@
                      pts, opts, "residuals");
 
      regressionPlots(d3.select("#regression2"), d3.select("#residuals2"),
-                     pts, opts, "rstandard");
+                     deepClone(pts), opts, "rstandard");
     </script>
 
   </body>
