@@ -24,9 +24,17 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
     var minX = xScale.invert(opts.padding);
     var maxX = xScale.invert(opts.width - opts.padding);
     
+    var svg = regression.append("svg")
+                        .attr("width", opts.width)
+                        .attr("height", opts.height);
+    var rsvg = resid.append("svg")
+                    .attr("width", opts.width)
+                    .attr("height", opts.height);
+
     // Mouse behaviors
     var drag = d3.behavior.drag()
-                          .origin(function(d) { return {x: xScale(d[0]), y: yScale(d[1])}; })
+                          .origin(function(d) { return {x: xScale(d[0]),
+                                                        y: yScale(d[1])}; })
                           .on("drag", dragmove);
 
     var dataHover = function(d, i) {
@@ -93,10 +101,6 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
                         xScale.invert(opts.width - opts.padding), true);
     }
     
-    var svg = regression.append("svg")
-                        .attr("width", opts.width)
-                        .attr("height", opts.height);
-
     svg.append("line")
        .attr("x1", xScale(minX))
        .attr("x2", xScale(maxX))
@@ -129,10 +133,6 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
        .call(yAxis);
 
     // Now for residuals!
-    var rsvg = resid.append("svg")
-                    .attr("width", opts.width)
-                    .attr("height", opts.height);
-
     rsvg.append("g")
         .attr("class", "axis")
         .attr("transform", "translate(0, " + (opts.height - opts.padding + 5) + ")")
@@ -153,7 +153,7 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .attr("transform", "translate(" + opts.padding + ", 0)")
         .call(ryAxis);
 
-     // Horizontal line at y = 0
+    // Horizontal line at y = 0
     rsvg.append("line")
         .attr("x1", xScale(minX))
         .attr("x2", xScale(maxX))
