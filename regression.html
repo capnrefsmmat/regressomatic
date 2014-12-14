@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>The Regressomatic 4000</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="regression.css">
+    <script src="sylvester/sylvester.js"></script>
+    <script src="regression.js"></script>
+  </head>
+  <body>
+    <h1>The Regressomatic 4000</h1>
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>Residuals</th>
+      </tr>
+      <tr>
+        <td id="regression"></td>
+
+        <td id="residuals"></td>
+      </tr>
+    </table>
+
+    <script>
+     // Data and setup
+     var pts = [[30, 30],
+                [200, 200],
+                [37, 84],
+                [83, 103],
+                [142, 121],
+                [421, 333],
+                [321, 231],
+                [382, 292],
+                [401, 342]];
+
+     var width = 480;
+     var height = 400;
+     var padding = 40;
+
+     var ptRadius = 5;
+     var hoverRadius = 8;
+
+     var ptColor = "#666";
+     var hoverColor = "blue";
+
+     // Scales
+     
+     var xScale = d3.scale.linear()
+                          .domain([0, 500])
+                          .range([padding, width - padding]);
+     var yScale = d3.scale.linear()
+                          .domain([400, 0])
+                          .range([padding, height - padding]);
+
+     var xAxis = d3.svg.axis()
+                       .scale(xScale)
+                       .orient("bottom")
+                       .ticks(5);
+     var yAxis = d3.svg.axis()
+                       .scale(yScale)
+                       .orient("left")
+                       .ticks(4);
+
+     // Mouse behaviors
+     
+     var drag = d3.behavior.drag()
+                           .origin(function(d) { return {x: xScale(d[0]), y: yScale(d[1])}; })
+                           .on("drag", dragmove);
+
+     var dataHover = function(d, i) {
+       d3.select(d3.selectAll("#regression circle")[0][i])
+         .transition()
+         .attr("r", hoverRadius)
+         .attr("fill", hoverColor);
+       d3.select(d3.selectAll("#resids circle")[0][i])
+         .transition()
+         .attr("r", hoverRadius)
+         .attr("fill", hoverColor);
+     }
+     var dataHoverOut = function(d, i) {
+       d3.select(d3.selectAll("#regression circle")[0][i])
+         .transition()
+         .attr("r", ptRadius)
+         .attr("fill", ptColor);
+       d3.select(d3.selectAll("#resids circle")[0][i])
+         .transition()
+         .attr("r", ptRadius)
+         .attr("fill", ptColor);
+     }
+     
+     function dragmove(d, i) {
+       mx = d3.event.x;
+       my = d3.event.y;
+
+       d[0] = xScale.invert(mx);
+       d[1] = yScale.invert(my);
+       
+       d3.select(this)
+         .attr("cx", mx)
+         .attr("cy", my);
+
+       var pts = d3.selectAll("#regression circle").data();
+       var r = regress(pts, xScale.invert(padding),
+                       xScale.invert(width - padding), true);
+       
+       svg.select("line")
+          .attr("x1", xScale(r[0]))
+          .attr("x2", xScale(r[1]))
+          .attr("y1", yScale(r[2]))
+          .attr("y2", yScale(r[3]));
+
+       var residData = pts.map(function(d, i) {
+         return [d[0], r[4][i]]
+       });
+
+       rsvg.selectAll("#resids circle")
+           .data(residData)
+           .attr("cx", function(d) { return xScale(d[0]) })
+           .attr("cy", function(d) { return ryScale(d[1]) });
+     }
+
+     // Draw data
+     
+     var r = regress(pts, xScale.invert(padding),
+                     xScale.invert(width - padding), true);
+
+     var svg = d3.select("#regression")
+                 .append("svg")
+                 .attr("width", width)
+                 .attr("height", height);
+
+     svg.append("line")
+        .attr("x1", xScale(r[0]))
+        .attr("x2", xScale(r[1]))
+        .attr("y1", yScale(r[2]))
+        .attr("y2", yScale(r[3]))
+        .attr("class", "rline");
+     
+     svg.append("g")
+        .attr("id", "data")
+        .selectAll("circle")
+        .data(pts)
+        .enter()
+        .append("circle")
+        .attr("r", ptRadius)
+        .attr("cx", function(d) { return xScale(d[0]) })
+        .attr("cy", function(d) { return yScale(d[1]) })
+        .attr("fill", ptColor)
+        .attr("class", "datapt")
+        .on("mouseover", dataHover)
+        .on("mouseout", dataHoverOut)
+        .call(drag);
+
+     svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0, " + (height - padding + 5) + ")")
+        .call(xAxis);
+     svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + padding + ", 0)")
+        .call(yAxis);
+
+     // Now for residuals!
+     var rsvg = d3.select("#residuals")
+                  .append("svg")
+                  .attr("width", width)
+                  .attr("height", height);
+
+     rsvg.append("g")
+         .attr("class", "axis")
+         .attr("transform", "translate(0, " + (height - padding + 5) + ")")
+         .call(xAxis);
+
+     var ryScale = d3.scale.linear()
+                           .domain([2, -2])
+                           .range([padding, height - padding]);
+     var ryAxis = d3.svg.axis()
+                        .scale(ryScale)
+                        .orient("left")
+                        .ticks(4);
+     rsvg.append("g")
+         .attr("class", "axis")
+         .attr("transform", "translate(" + padding + ", 0)")
+         .call(ryAxis);
+
+     // Horizontal line at y = 0
+     rsvg.append("line")
+         .attr("x1", xScale(r[0]))
+         .attr("x2", xScale(r[1]))
+         .attr("y1", ryScale(0))
+         .attr("y2", ryScale(0))
+         .attr("class", "rline");
+     
+     var residData = pts.map(function(d, i) {
+       return [d[0], r[4][i]]
+     });
+
+     rsvg.append("g")
+         .attr("id", "resids")
+         .selectAll("circle")
+         .data(residData)
+         .enter()
+         .append("circle")
+         .attr("r", ptRadius)
+         .attr("cx", function(d) { return xScale(d[0]) })
+         .attr("cy", function(d) { return ryScale(d[1]) })
+         .attr("fill", ptColor)
+         .attr("class", "datapt")
+         .on("mouseover", dataHover)
+         .on("mouseout", dataHoverOut);
+    </script>
+
+  </body>
+</html>
