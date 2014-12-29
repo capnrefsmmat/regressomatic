@@ -80,17 +80,7 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
            .attr("y1", yScale(r[2]))
            .attr("y2", yScale(r[3]));
 
-        if (diagnostic === "qqnorm") {
-            var len = pts.length;
-            var o = order(order(r[4]));
-            var residData = o.map(function(d, i) {
-                return [rankit(d + 1, len), r[4][i]];
-            });
-        } else {
-            var residData = pts.map(function(d, i) {
-                return [d[0], r[4][i]];
-            });
-        }
+        var residData = makeResidData(pts, r[4], diagnostic);
 
         rsvg.selectAll("circle")
             .data(residData)
@@ -197,16 +187,9 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
             .attr("y1", ryScale(-3))
             .attr("y2", ryScale(3))
             .attr("class", "rline");
-        var len = data.length;
-        var o = order(order(r[4]));
-        var residData = o.map(function(d, i) {
-            return [rankit(d + 1, len), r[4][i]];
-        });
-    } else {
-        var residData = data.map(function(d, i) {
-            return [d[0], r[4][i]];
-        });
     }
+
+    var residData = makeResidData(data, r[4], diagnostic);
 
     rsvg.append("g")
         .attr("id", "resids")
@@ -378,4 +361,20 @@ function order(arr) {
     return d3.range(len).sort(function(a, b) {
         return arr[a] - arr[b];
     });
+}
+
+// Produce the d3 data object for the residual plots.
+function makeResidData(pts, resids, diagnostic) {
+    if (diagnostic === "qqnorm") {
+        var len = pts.length;
+        var o = order(order(resids));
+        var residData = o.map(function(d, i) {
+            return [rankit(d + 1, len), resids[i]];
+        });
+    } else {
+        var residData = pts.map(function(d, i) {
+            return [d[0], resids[i]];
+        });
+    }
+    return residData;
 }
