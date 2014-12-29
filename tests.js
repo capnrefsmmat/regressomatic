@@ -45,3 +45,13 @@ QUnit.test("Leverage", function(assert) {
     assert.close(resid[0], 0.296, 0.01, "Leverage 0");
     assert.close(resid[4], 0.144, 0.01, "Leverage 4");
 });
+
+QUnit.test("Matrix to D3", function(assert) {
+    var conv = matrixToD3(pts);
+    var len = pts.length;
+
+    for (var i = 0; i < len; i++) {
+        assert.equal(conv[i].x, pts[i][0]);
+        assert.equal(conv[i].y, pts[i][1]);
+    }
+});

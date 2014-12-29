@@ -202,6 +202,16 @@ function deepClone(arr) {
     return newArr;
 }
 
+// Take a matrix of [[x,y],...] data and turn it into D3's [{x,y},...] format.
+function matrixToD3(d) {
+    var len = d.length;
+    var newData = new Array(len);
+    for (var i = 0; i < len; i++) {
+        newData[i] = {x: d[i][0], y: d[i][1]};
+    }
+    return newData;
+}
+
 function regress(data, minX, maxX, diagnostics) {
     diagnostics = diagnostics || "residuals";
     
@@ -254,4 +264,24 @@ function cooks(residuals, hat) {
 // Extract the leverage from the hat matrix, returning a Vector.
 function leverage(hat) {
     return hat.diagonal();
+}
+
+// Sample from a standard normal distribution.
+// Adapted from http://bl.ocks.org/mbostock/4349187
+function stdnormal() {
+  var x = 0, y = 0, rds, c;
+  do {
+    x = Math.random() * 2 - 1;
+    y = Math.random() * 2 - 1;
+    rds = x * x + y * y;
+  } while (rds == 0 || rds > 1);
+  c = Math.sqrt(-2 * Math.log(rds) / rds); // Box-Muller transform
+  return x * c; // throw away extra sample y * c
+}
+
+// Returns sampler for normal distribution with any mean and standard deviation
+function normal(mean, deviation) {
+  return function() {
+    return mean + deviation * normal();
+  };
 }
