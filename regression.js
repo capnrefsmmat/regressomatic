@@ -80,13 +80,21 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
            .attr("y1", yScale(r[2]))
            .attr("y2", yScale(r[3]));
 
-        var residData = pts.map(function(d, i) {
-            return [d[0], r[4][i]];
-        }); 
+        if (diagnostic === "qqnorm") {
+            var len = pts.length;
+            var o = order(order(r[4]));
+            var residData = o.map(function(d, i) {
+                return [rankit(d + 1, len), r[4][i]];
+            });
+        } else {
+            var residData = pts.map(function(d, i) {
+                return [d[0], r[4][i]];
+            });
+        }
 
         rsvg.selectAll("circle")
             .data(residData)
-            .attr("cx", function(d) { return xScale(d[0]); })
+            .attr("cx", function(d) { return rxScale(d[0]); })
             .attr("cy", function(d) { return ryScale(d[1]); });
     }
 
@@ -126,44 +134,79 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
        .call(yAxis);
 
     // Now for residuals!
-    rsvg.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0, " + (opts.height - opts.padding + 5) + ")")
-        .call(xAxis);
-
     var residRange = 1.5 * d3.max(r[4].map(Math.abs));
     if (diagnostic === "cooks" || diagnostic === "leverage") {
         var ryScale = d3.scale.linear()
                               .domain([residRange, 0])
                               .range([opts.padding, opts.height - opts.padding])
                               .nice();
-    } else {
+        var rxScale = xScale;
+    } else if (diagnostic === "rstandard" || diagnostic === "residuals") {
         var ryScale = d3.scale.linear()
                               .domain([residRange, -residRange])
                               .range([opts.padding, opts.height - opts.padding])
                               .nice();
+        var rxScale = xScale;
+    } else if (diagnostic === "qqnorm") {
+        var ryScale = d3.scale.linear()
+                              .domain([3, -3])
+                              .range([opts.padding, opts.height - opts.padding])
+                              .nice();
+        var rxScale = d3.scale.linear()
+                              .domain([-3, 3])
+                              .range([opts.padding, opts.width - opts.padding])
+                              .nice();
     }
+
+    var rxAxis = d3.svg.axis()
+                   .scale(rxScale)
+                   .orient("bottom")
+                   .ticks(4);
+
     var ryAxis = d3.svg.axis()
                        .scale(ryScale)
                        .orient("left")
                        .ticks(4);
+
+    rsvg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0, " + (opts.height - opts.padding + 5) + ")")
+        .call(rxAxis);
+
     rsvg.append("g")
         .attr("class", "axis ry")
         .attr("transform", "translate(" + opts.padding + ", 0)")
         .call(ryAxis);
 
-    // Horizontal line at y = 0. Not needed for Cook's distance and leverage
-    if (diagnostic !== "cooks" && diagnostic !== "leverage") {
+    // Horizontal line at y = 0. Not needed for Cook's distance, Q-Q,
+    // and leverage
+    if (diagnostic !== "cooks" && diagnostic !== "leverage" &&
+        diagnostic !== "qqnorm") {
         rsvg.append("line")
-            .attr("x1", xScale(minX))
-            .attr("x2", xScale(maxX))
+            .attr("x1", rxScale(minX))
+            .attr("x2", rxScale(maxX))
             .attr("y1", ryScale(0))
             .attr("y2", ryScale(0))
             .attr("class", "rline");
     }
-    var residData = data.map(function(d, i) {
-        return [d[0], r[4][i]];
-    });
+    if (diagnostic === "qqnorm") {
+        // Add a diagonal line at y = x.
+        rsvg.append("line")
+            .attr("x1", rxScale(-3))
+            .attr("x2", rxScale(3))
+            .attr("y1", ryScale(-3))
+            .attr("y2", ryScale(3))
+            .attr("class", "rline");
+        var len = data.length;
+        var o = order(order(r[4]));
+        var residData = o.map(function(d, i) {
+            return [rankit(d + 1, len), r[4][i]];
+        });
+    } else {
+        var residData = data.map(function(d, i) {
+            return [d[0], r[4][i]];
+        });
+    }
 
     rsvg.append("g")
         .attr("id", "resids")
@@ -172,7 +215,7 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .enter()
         .append("circle")
         .attr("r", opts.ptRadius)
-        .attr("cx", function(d) { return xScale(d[0]); })
+        .attr("cx", function(d) { return rxScale(d[0]); })
         .attr("cy", function(d) { return ryScale(d[1]); })
         .attr("fill", opts.ptColor)
         .attr("class", "datapt")
@@ -202,16 +245,6 @@ function deepClone(arr) {
     return newArr;
 }
 
-// Take a matrix of [[x,y],...] data and turn it into D3's [{x,y},...] format.
-function matrixToD3(d) {
-    var len = d.length;
-    var newData = new Array(len);
-    for (var i = 0; i < len; i++) {
-        newData[i] = {x: d[i][0], y: d[i][1]};
-    }
-    return newData;
-}
-
 function regress(data, minX, maxX, diagnostics) {
     diagnostics = diagnostics || "residuals";
     
@@ -228,7 +261,7 @@ function regress(data, minX, maxX, diagnostics) {
 
     var residuals = Matrix.I(data.length).subtract(hat).multiply(Y).col(1);
 
-    if (diagnostics === "rstandard") {
+    if (diagnostics === "rstandard" || diagnostics === "qqnorm") {
         residuals = rstandard(residuals, hat);
     } else if (diagnostics === "cooks") {
         residuals = cooks(rstandard(residuals, hat), hat);
@@ -284,4 +317,65 @@ function normal(mean, deviation) {
   return function() {
     return mean + deviation * normal();
   };
+}
+
+// Complementary error function
+// From Numerical Recipes in C 2e p221,
+// as adapted in
+// https://github.com/errcw/gaussian/blob/5cb185f0d7dd8a6ee6385260d032275c080792fe/lib/gaussian.js
+function erfc(x) {
+    var z = Math.abs(x);
+    var t = 1 / (1 + z / 2);
+    var r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 +
+            t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 +
+            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 +
+            t * (-0.82215223 + t * 0.17087277)))))))));
+    return x >= 0 ? r : 2 - r;
+}
+
+// Inverse complementary error function
+// From Numerical Recipes 3e p265
+// as adapted in
+// https://github.com/errcw/gaussian/blob/5cb185f0d7dd8a6ee6385260d032275c080792fe/lib/gaussian.js
+function ierfc(x) {
+    if (x >= 2) { return -100; }
+    if (x <= 0) { return 100; }
+
+    var xx = (x < 1) ? x : 2 - x;
+    var t = Math.sqrt(-2 * Math.log(xx / 2));
+    var r = -0.70711 * ((2.30753 + t * 0.27061) /
+                        (1 + t * (0.99229 + t * 0.04481)) - t);
+
+    for (var j = 0; j < 2; j++) {
+        var err = erfc(r) - xx;
+        r += err / (1.12837916709551257 * Math.exp(-(r * r)) - r * err);
+    }
+
+    return (x < 1) ? r : -r;
+}
+
+// The standard normal inverse cdf.
+function probit(x) {
+    return - Math.sqrt(2) * ierfc(2 * x);
+}
+
+// For data from a standard normal distribution, this returns the expected value
+// of the ith order statistic out of n. This follows R's ppoints().
+// Note that i starts from 1, not 0.
+function rankit(i, n) {
+    if (n <= 10) {
+        var a = 3/8;
+    } else {
+        var a = 1/2;
+    }
+
+    return probit((i - a) / (n + 1 - 2 * a));
+}
+
+// Return an array of indices that put arr into sorted order.
+function order(arr) {
+    var len = arr.length;
+    return d3.range(len).sort(function(a, b) {
+        return arr[a] - arr[b];
+    });
 }

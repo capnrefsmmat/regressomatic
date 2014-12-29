@@ -51,7 +51,7 @@
       </tr>
     </table>
 
-    <p>Finally, leverage.</p>
+    <p>Next, leverage.</p>
 
     <table>
       <tr>
@@ -61,6 +61,19 @@
       <tr>
         <td id="regression4"></td>
         <td id="residuals4"></td>
+      </tr>
+    </table>
+
+    <p>Finally, quantile-quantile plots of the standardized residuals.</p>
+
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>Q-Q plot</th>
+      </tr>
+      <tr>
+        <td id="regression5"></td>
+        <td id="residuals5"></td>
       </tr>
     </table>
 
@@ -99,6 +112,9 @@
 
      regressionPlots(d3.select("#regression4"), d3.select("#residuals4"),
                      deepClone(pts), opts, "leverage");
+
+     regressionPlots(d3.select("#regression5"), d3.select("#residuals5"),
+                     deepClone(pts), opts, "qqnorm");
     </script>
 
   </body>

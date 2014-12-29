@@ -46,12 +46,26 @@ QUnit.test("Leverage", function(assert) {
     assert.close(resid[4], 0.144, 0.01, "Leverage 4");
 });
 
-QUnit.test("Matrix to D3", function(assert) {
-    var conv = matrixToD3(pts);
-    var len = pts.length;
+QUnit.test("Probit function", function(assert) {
+    assert.close(probit(0.5), 0, 0.001);
+    assert.close(probit(0.7), 0.5244, 0.001);
+    assert.close(probit(0.3), -0.5244, 0.001);
+    assert.close(probit(0.99), 2.326, 0.001);
+    assert.close(probit(0.01), -2.326, 0.001);
+});
 
+QUnit.test("Rankit function", function(assert) {
+    assert.close(rankit(1, 9), -1.494, 0.001);
+    assert.close(rankit(4, 9), -0.274, 0.001);
+});
+
+QUnit.test("Array ordering", function(assert) {
+    var arr = [1, 4, -2, 3, 7];
+    var out = [2, 0, 3, 1, 4];
+
+    var len = arr.length;
+    var o = order(arr);
     for (var i = 0; i < len; i++) {
-        assert.equal(conv[i].x, pts[i][0]);
-        assert.equal(conv[i].y, pts[i][1]);
+        assert.equal(out[i], o[i]);
     }
 });

@@ -12,3 +12,12 @@ rstandard(m)[c(1,5)]
 cooks.distance(m)[c(1,5)]
 
 lm.influence(m)$hat[c(1,5)]
+
+# Probit function
+qnorm(0.5)
+qnorm(0.7)
+qnorm(0.99)
+
+# Rankit function
+qnorm(ppoints(9)[1])
+qnorm(ppoints(9)[4])
