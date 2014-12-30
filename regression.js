@@ -1,3 +1,5 @@
+"use strict";
+
 // regression and resid should be d3 selections of the elements which should get
 // plots appended to them.
 // diagnostic can be:
@@ -124,28 +126,29 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
        .call(yAxis);
 
     // Now for residuals!
+    var ryScale, rxScale;
     var residRange = 1.5 * d3.max(r[4].map(Math.abs));
     if (diagnostic === "cooks" || diagnostic === "leverage") {
-        var ryScale = d3.scale.linear()
-                              .domain([residRange, 0])
-                              .range([opts.padding, opts.height - opts.padding])
-                              .nice();
-        var rxScale = xScale;
+        ryScale = d3.scale.linear()
+                          .domain([residRange, 0])
+                          .range([opts.padding, opts.height - opts.padding])
+                          .nice();
+        rxScale = xScale;
     } else if (diagnostic === "rstandard" || diagnostic === "residuals") {
-        var ryScale = d3.scale.linear()
-                              .domain([residRange, -residRange])
-                              .range([opts.padding, opts.height - opts.padding])
-                              .nice();
-        var rxScale = xScale;
+        ryScale = d3.scale.linear()
+                          .domain([residRange, -residRange])
+                          .range([opts.padding, opts.height - opts.padding])
+                          .nice();
+        rxScale = xScale;
     } else if (diagnostic === "qqnorm") {
-        var ryScale = d3.scale.linear()
-                              .domain([3, -3])
-                              .range([opts.padding, opts.height - opts.padding])
-                              .nice();
-        var rxScale = d3.scale.linear()
-                              .domain([-3, 3])
-                              .range([opts.padding, opts.width - opts.padding])
-                              .nice();
+        ryScale = d3.scale.linear()
+                          .domain([3, -3])
+                          .range([opts.padding, opts.height - opts.padding])
+                          .nice();
+        rxScale = d3.scale.linear()
+                          .domain([-3, 3])
+                          .range([opts.padding, opts.width - opts.padding])
+                          .nice();
     }
 
     var rxAxis = d3.svg.axis()
@@ -346,10 +349,11 @@ function probit(x) {
 // of the ith order statistic out of n. This follows R's ppoints().
 // Note that i starts from 1, not 0.
 function rankit(i, n) {
+    var a;
     if (n <= 10) {
-        var a = 3/8;
+        a = 3/8;
     } else {
-        var a = 1/2;
+        a = 1/2;
     }
 
     return probit((i - a) / (n + 1 - 2 * a));
@@ -365,14 +369,15 @@ function order(arr) {
 
 // Produce the d3 data object for the residual plots.
 function makeResidData(pts, resids, diagnostic) {
+    var residData;
     if (diagnostic === "qqnorm") {
         var len = pts.length;
         var o = order(order(resids));
-        var residData = o.map(function(d, i) {
+        residData = o.map(function(d, i) {
             return [rankit(d + 1, len), resids[i]];
         });
     } else {
-        var residData = pts.map(function(d, i) {
+        residData = pts.map(function(d, i) {
             return [d[0], resids[i]];
         });
     }

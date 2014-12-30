@@ -1,3 +1,5 @@
+"use strict";
+
 // Some example data.
 var pts = [[30, 30],
            [200, 200],
