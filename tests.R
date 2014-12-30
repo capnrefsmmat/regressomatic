@@ -21,3 +21,6 @@ qnorm(0.99)
 # Rankit function
 qnorm(ppoints(9)[1])
 qnorm(ppoints(9)[4])
+
+# makeResidData for qqnorm
+qqnorm(rstandard(m), plot.it=FALSE)$x

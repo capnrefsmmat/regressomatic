@@ -71,3 +71,13 @@ QUnit.test("Array ordering", function(assert) {
         assert.equal(out[i], o[i]);
     }
 });
+
+QUnit.test("QQNorm for residuals", function(assert) {
+    var resids = regress(pts, 0, 100, "rstandard")[4];
+    var d = makeResidData(pts, resids, "qqnorm");
+
+    var out = [-0.9319713, 0.5716375, 0.9319713, 0.2743915, -0.5716375,
+               0.0, -1.4941549, -0.2743915, 1.4941549];
+
+    d.forEach(function(r, i) { assert.close(r[0], out[i], 0.001); });
+});
