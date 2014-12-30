@@ -7,7 +7,10 @@
 // - "rstandard" for standardized residuals
 // - "cooks" for Cook's distances
 // - "leverage" for leverage (diagonal of hat matrix)
-function regressionPlots(regression, resid, data, opts, diagnostic) {    
+function regressionPlots(regression, resid, data, opts, diagnostic, xlab, ylab) {
+    xlab = xlab || "";
+    ylab = ylab || "";
+
     // Scales
     var xScale = d3.scale.linear()
                          .domain([0, 500])
@@ -125,6 +128,23 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
        .attr("transform", "translate(" + opts.padding + ", 0)")
        .call(yAxis);
 
+    // Add axes labels
+    svg.append("text")
+       .attr("class", "x label")
+       .attr("text-anchor", "end")
+       .attr("x", opts.width - opts.padding)
+       .attr("y", opts.height - opts.padding)
+       .text(xlab);
+
+    svg.append("text")
+       .attr("class", "y label")
+       .attr("text-anchor", "end")
+       .attr("y", opts.padding)
+       .attr("x", -opts.padding)
+       .attr("dy", "1em")
+       .attr("transform", "rotate(-90)")
+       .text(ylab);
+
     // Now for residuals!
     var ryScale, rxScale;
     var residRange = 1.5 * d3.max(r[4].map(Math.abs));
@@ -207,6 +227,37 @@ function regressionPlots(regression, resid, data, opts, diagnostic) {
         .attr("class", "datapt")
         .on("mouseover", dataHover)
         .on("mouseout", dataHoverOut);
+
+    // Diagnostic axes labels
+    var rxlab = xlab, rylab;
+    if (diagnostic === "residuals") {
+        rylab = "Residuals";
+    } else if (diagnostic === "rstandard") {
+        rylab = "Standardized residuals";
+    } else if (diagnostic === "cooks") {
+        rylab = "Cook's distance";
+    } else if (diagnostic === "leverage") {
+        rylab = "Leverage";
+    } else if (diagnostic === "qqnorm") {
+        rxlab = "Theoretical quantiles";
+        rylab = "Sample quantiles";
+    }
+
+    rsvg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", opts.width - opts.padding)
+        .attr("y", opts.height - opts.padding)
+        .text(rxlab);
+
+    rsvg.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("y", opts.padding)
+        .attr("x", -opts.padding)
+        .attr("dy", "1em")
+        .attr("transform", "rotate(-90)")
+        .text(rylab);
 }
 
 // make a column Matrix of ones

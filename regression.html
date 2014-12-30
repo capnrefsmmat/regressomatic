@@ -102,7 +102,7 @@
      };
 
      regressionPlots(d3.select("#regression"), d3.select("#residuals"),
-                     pts, opts, "residuals");
+                     pts, opts, "residuals", "An axis label", "A Y axis label");
 
      regressionPlots(d3.select("#regression2"), d3.select("#residuals2"),
                      deepClone(pts), opts, "rstandard");
