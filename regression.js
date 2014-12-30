@@ -285,21 +285,21 @@ function leverage(hat) {
 // Sample from a standard normal distribution.
 // Adapted from http://bl.ocks.org/mbostock/4349187
 function stdnormal() {
-  var x = 0, y = 0, rds, c;
-  do {
-    x = Math.random() * 2 - 1;
-    y = Math.random() * 2 - 1;
-    rds = x * x + y * y;
-  } while (rds == 0 || rds > 1);
-  c = Math.sqrt(-2 * Math.log(rds) / rds); // Box-Muller transform
-  return x * c; // throw away extra sample y * c
+    var x = 0, y = 0, rds, c;
+    do {
+        x = Math.random() * 2 - 1;
+        y = Math.random() * 2 - 1;
+        rds = x * x + y * y;
+    } while (rds == 0 || rds > 1);
+    c = Math.sqrt(-2 * Math.log(rds) / rds); // Box-Muller transform
+    return x * c; // throw away extra sample y * c
 }
 
 // Returns sampler for normal distribution with any mean and standard deviation
 function normal(mean, deviation) {
-  return function() {
-    return mean + deviation * normal();
-  };
+    return function() {
+        return mean + deviation * normal();
+    };
 }
 
 // Complementary error function
