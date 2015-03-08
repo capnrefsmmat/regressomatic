@@ -153,7 +153,7 @@
     </table>
     <script>
      regressionPlots(d3.select("#ans2reg"), d3.select("#ans2resid"),
-                     deepClone(ans2), opts, [3,16], [13, 3], "rstandard",
+                     deepClone(ans2), opts, [3,16], [13, 3], "residuals",
                      "X2", "Y2");
     </script>
 
@@ -219,7 +219,9 @@
     <p>
       Cook's distance is useful when there are major outliers or influential
       points. For example, it highlights the outlying point here, which pulls
-      the regression line disproportionately upwards. Notice the scale.
+      the regression line disproportionately upwards. The other data points lie
+      almost exactly on a line, so they <em>individually</em> have very little
+      influence on the line.
     </p>
     <table>
       <tr>
