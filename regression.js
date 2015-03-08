@@ -70,12 +70,12 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
         var mx = d3.event.x;
         var my = d3.event.y;
 
-        d[0] = xScale.invert(mx);
-        d[1] = yScale.invert(my);
+        d[0] = boundBetween(xScale.invert(mx), xrange[0], xrange[1]);
+        d[1] = boundBetween(yScale.invert(my), yrange[1], yrange[0]);
        
         d3.select(this)
-          .attr("cx", mx)
-          .attr("cy", my);
+          .attr("cx", xScale(d[0]))
+          .attr("cy", yScale(d[1]));
 
         var pts = regression.selectAll("circle").data();        
         var r = regress(pts, minX, maxX, diagnostic);
@@ -263,6 +263,10 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
         .attr("dy", "1em")
         .attr("transform", "rotate(-90)")
         .text(rylab);
+}
+
+function boundBetween(x, min, max) {
+    return Math.max(min, Math.min(x, max));
 }
 
 // make a column Matrix of ones
