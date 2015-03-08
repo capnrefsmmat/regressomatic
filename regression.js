@@ -7,16 +7,17 @@
 // - "rstandard" for standardized residuals
 // - "cooks" for Cook's distances
 // - "leverage" for leverage (diagonal of hat matrix)
-function regressionPlots(regression, resid, data, opts, diagnostic, xlab, ylab) {
+function regressionPlots(regression, resid, data, opts, xrange, yrange,
+                         diagnostic, xlab, ylab) {
     xlab = xlab || "";
     ylab = ylab || "";
 
     // Scales
     var xScale = d3.scale.linear()
-                         .domain([0, 500])
+                         .domain(xrange)
                          .range([opts.padding, opts.width - opts.padding]);
     var yScale = d3.scale.linear()
-                         .domain([400, 0])
+                         .domain(yrange)
                          .range([opts.padding, opts.height - opts.padding]);
 
     var xAxis = d3.svg.axis()
@@ -114,6 +115,8 @@ function regressionPlots(regression, resid, data, opts, diagnostic, xlab, ylab) 
        .attr("cx", function(d) { return xScale(d[0]); })
        .attr("cy", function(d) { return yScale(d[1]); })
        .attr("fill", opts.ptColor)
+       .attr("stroke", opts.ptBorderColor)
+       .attr("stroke-width", "0.5px")
        .attr("class", "datapt")
        .on("mouseover", dataHover)
        .on("mouseout", dataHoverOut)
@@ -224,6 +227,8 @@ function regressionPlots(regression, resid, data, opts, diagnostic, xlab, ylab) 
         .attr("cx", function(d) { return rxScale(d[0]); })
         .attr("cy", function(d) { return ryScale(d[1]); })
         .attr("fill", opts.ptColor)
+        .attr("stroke", opts.ptBorderColor)
+        .attr("stroke-width", "0.5px")
         .attr("class", "datapt")
         .on("mouseover", dataHover)
         .on("mouseout", dataHoverOut);

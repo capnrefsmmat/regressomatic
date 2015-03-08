@@ -10,34 +10,194 @@
   </head>
   <body>
     <h1>The Regressomatic 4000</h1>
-    <p>First, a simple regression and ordinary residuals. Click and drag any data point to move it and see the change in the residuals.</p>
+    <p><em>by</em> <a href="http://www.refsmmat.com">Alex Reinhart</a></p>
+    <p>
+      Once you have fit a regression model, your work is not finished. There are
+      a variety of diagnostic plots you can make to ensure the model fits
+      well. (There are also a range of diagnostic tests, but diagnostic plots
+      are easy to make and give more useful information.) This page is a brief
+      overview&mdash;not a textbook on diagnostics, but a brief introduction to
+      each type of plot.
+    </p>
+    <p>
+      The diagnostic plots on this page are interactive. You can click and drag
+      data points in the scatterplot to see what happens to the diagnostics, so
+      spend some time playing with the data to see what happens.
+    </p>
+    <h2>Why diagnostics?</h2>
+    <p>
+      There are a million different ways to fit a regression model. You can add
+      square or cubic terms, transform variables, weight data points, or drop
+      outliers. But first you need to know how well your model fits.
+    </p>
+    <p>
+      The classic example of the need to visualize your model fit is Anscombe's
+      Quartet, four scatterplots of data which have identical means, variances,
+      regression lines and correlation coefficients:
+    </p>
+    <figure>
+      <img width="90%" src="img/anscombes-quartet.svg">
+      <figcaption>
+        Plot from <a
+        href="https://commons.wikimedia.org/wiki/File:Anscombe%27s_quartet_3.svg">Wikimedia
+        Commons</a>, by users Schutz and Avenue.
+      </figcaption>
+    </figure>
+    <p>
+      Only the top left plot looks like the regression line really fits the
+      data. Let's use Ancombe's quartet as examples as we look at regression
+      diagnostics.
+    </p>
+    <script>
+     // Anscombe's quartet, from R's "anscombe" dataset
+     var ans1 = [[10, 8.04],
+                 [8, 6.95],
+                 [13, 7.58],
+                 [9, 8.81],
+                 [11, 8.33],
+                 [14, 9.96],
+                 [6, 7.24],
+                 [4, 4.26],
+                 [12, 10.84],
+                 [7, 4.82],
+                 [5, 5.68]];
+
+     var ans2 = [[10, 9.14],
+                 [8, 8.14],
+                 [13, 8.74],
+                 [9, 8.77],
+                 [11, 9.26],
+                 [14, 8.10],
+                 [6, 6.13],
+                 [4, 3.10],
+                 [12, 9.13],
+                 [7, 7.26],
+                 [5, 4.74]];
+
+     var ans3 = [[10, 7.46],
+                 [8, 6.77],
+                 [13, 12.74],
+                 [9, 7.11],
+                 [11, 7.81],
+                 [14, 8.84],
+                 [6, 6.08],
+                 [4, 5.39],
+                 [12, 8.15],
+                 [7, 6.42],
+                 [5, 5.73]];
+     
+     var ans4 = [[8, 6.58],
+                 [8, 5.76],
+                 [8, 7.71],
+                 [8, 8.84],
+                 [8, 8.47],
+                 [8, 7.04],
+                 [8, 5.25],
+                 [19, 12.50],
+                 [8, 5.56],
+                 [8, 7.91],
+                 [8, 6.89]];
+
+     // Plot styles
+     var opts = {
+       width: 390,
+       height: 350,
+       padding: 40,
+
+       ptRadius: 5,
+       hoverRadius: 8,
+
+       ptColor: "#FFA500",
+       ptBorderColor: "#F00",
+       hoverColor: "#FF4800"
+     };
+    </script>
+    
+    <h2>Residuals</h2>
+    <p>
+      First, a simple regression and ordinary residuals. Click and drag any data
+      point to move it and see the change in the residuals.
+    </p>
     <table>
       <tr>
         <th>Regression</th>
         <th>Residuals</th>
       </tr>
       <tr>
-        <td id="regression"></td>
+        <td id="ans1reg"></td>
 
-        <td id="residuals"></td>
+        <td id="ans1resid"></td>
       </tr>
     </table>
+    <script>
+      regressionPlots(d3.select("#ans1reg"), d3.select("#ans1resid"),
+                      deepClone(ans1), opts, [3,19], [13, 3], "residuals",
+                      "X1", "Y1");
+    </script>
 
-    <p>Next, let's <em>standardize</em> the residuals. Now try fiddling with the data; notice that as one data point is pulled to become an outlier, the other residuals become smaller, since the residual variance is increasing.</p>
+    <p>
+      Those look pretty reasonable. The residuals are a blob: no obvious
+      structure, spread evenly above and below zero. But suppose instead we try
+      the second dataset from Anscombe's quartet, which is really
+      quadratic. Then the residuals look very fishy indeed:
+    </p>
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>Residuals</th>
+      </tr>
+      <tr>
+        <td id="ans2reg"></td>
+        <td id="ans2resid"></td>
+      </tr>
+    </table>
+    <script>
+     regressionPlots(d3.select("#ans2reg"), d3.select("#ans2resid"),
+                     deepClone(ans2), opts, [3,19], [13, 3], "rstandard",
+                     "X2", "Y2");
+    </script>
 
+    <p>
+      When the residuals appear curved or otherwise have a strange shape, your
+      model is missing something. Here we can see there's a quadratic trend left
+      over after the linear trend is fit, so we should add a quadratic term.
+    </p>
+
+    <h2>Standardized residuals</h2>
+    
+    <p>
+      Next, let's <em>standardize</em> the residuals. We'll return to the first
+      dataset in the quartet. Try fiddling with the data: notice that as one
+      data point is pulled to become an outlier, the other residuals become
+      smaller, since the residual variance is increasing.
+    </p>
     <table>
       <tr>
         <th>Regression</th>
         <th>Standardized residuals</th>
       </tr>
       <tr>
-        <td id="regression2"></td>
+        <td id="ans1reg2"></td>
 
-        <td id="residuals2"></td>
+        <td id="ans1standard"></td>
       </tr>
     </table>
+    <script>
+     regressionPlots(d3.select("#ans1reg2"), d3.select("#ans1standard"),
+                     deepClone(ans1), opts, [3,19], [13, 3], "rstandard",
+                     "X1", "Y1");
+    </script>
 
-    <p>Next, let's try Cook's distances. The Cook's distance of a data point measures how much the model parameters would change if that point were removed, so it is a very intuitive measure of influence. Notice that if you vertically displace a point near the middle of the line, the distance won't pass 0.6 no matter how hard you try, while a point at either end of the line can easily have a distance over 1.</p>
+    <h2>Cook's distance</h2>
+
+    <p>
+      Next, let's try Cook's distances. The Cook's distance of a data point
+      measures how much the model parameters would change if that point were
+      removed, so it is a very intuitive measure of influence. Notice that if
+      you vertically displace a point near the middle of the line, the distance
+      won't pass 0.6 no matter how hard you try, while a point at either end of
+      the line can easily have a distance over 1.
+    </p>
 
     <table>
       <tr>
@@ -45,13 +205,49 @@
         <th>Cook's distances</th>
       </tr>
       <tr>
-        <td id="regression3"></td>
+        <td id="ans1reg3"></td>
 
-        <td id="residuals3"></td>
+        <td id="ans1cook"></td>
       </tr>
     </table>
+    <script>
+     regressionPlots(d3.select("#ans1reg3"), d3.select("#ans1cook"),
+                     deepClone(ans1), opts, [3,19], [13, 3], "cooks",
+                     "X1", "Y1");
+    </script>
 
-    <p>Next, leverage.</p>
+    <p>
+      Cook's distance is useful when there are major outliers or influential
+      points. For example, it highlights the outlying point here, which pulls
+      the regression line disproportionately upwards. Notice the scale.
+    </p>
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>Cook's distances</th>
+      </tr>
+      <tr>
+        <td id="ans3reg"></td>
+
+        <td id="ans3cook"></td>
+      </tr>
+    </table>
+    <script>
+     regressionPlots(d3.select("#ans3reg"), d3.select("#ans3cook"),
+                     deepClone(ans3), opts, [3,19], [13, 3], "cooks",
+                     "X3", "Y3");
+    </script>
+    <p>
+      The Cook's distance for the fourth plot in the quartet is even more
+      extreme&mdash;it's essentially infinite for the outlying point. All the
+      other points share the same X value, so the outlying point completely
+      determines the regression line, which always passes through it. It's as if
+      we only had two data points.
+    </p>
+
+    <h2>Leverage</h2>
+
+    <p>Next, leverage. Actually I'm not sure what it's good for.</p>
 
     <table>
       <tr>
@@ -59,12 +255,33 @@
         <th>Leverage</th>
       </tr>
       <tr>
-        <td id="regression4"></td>
-        <td id="residuals4"></td>
+        <td id="ans1reg4"></td>
+        <td id="ans1lev"></td>
       </tr>
     </table>
+    <script>
+     regressionPlots(d3.select("#ans1reg4"), d3.select("#ans1lev"),
+                     deepClone(ans1), opts, [3,19], [13,3], "leverage",
+                     "X1", "Y1");
+    </script>
 
-    <p>Finally, quantile-quantile plots of the standardized residuals.</p>
+    <h2>Quantile-quantile plots</h2>
+
+    <p>
+      Quantile-quantile plots are a bit difficult to get intuition
+      about. They're designed to check if residuals are normally distributed. Of
+      course, once your dataset becomes large enough, normality isn't an
+      important assumption&mdash;the linear regression estimators have
+      asymptotically normal sampling distributions regardless, so you can do the
+      standard tests on coefficients.
+    </p>
+    <p>
+      On the X axis of the Q-Q plot lie the expected values of the order
+      statistics of a normal distribution. On the Y axis are the standardized
+      residuals. Hence the smallest residual is compared against its expected
+      value, and so on. If the points deviate from a line, the normal
+      distribution is not a good fit for the residuals.
+    </p>
 
     <table>
       <tr>
@@ -72,50 +289,53 @@
         <th>Q-Q plot</th>
       </tr>
       <tr>
-        <td id="regression5"></td>
-        <td id="residuals5"></td>
+        <td id="ans1reg5"></td>
+        <td id="ans1qq"></td>
       </tr>
     </table>
-
     <script>
-     // Data and setup
-     var pts = [[30, 30],
-                [200, 200],
-                [37, 84],
-                [83, 103],
-                [142, 121],
-                [421, 333],
-                [321, 231],
-                [382, 292],
-                [401, 342]];
-
-     var opts = {
-       width: 480,
-       height: 400,
-       padding: 40,
-
-       ptRadius: 5,
-       hoverRadius: 8,
-
-       ptColor: "#666",
-       hoverColor: "blue"
-     };
-
-     regressionPlots(d3.select("#regression"), d3.select("#residuals"),
-                     pts, opts, "residuals", "An axis label", "A Y axis label");
-
-     regressionPlots(d3.select("#regression2"), d3.select("#residuals2"),
-                     deepClone(pts), opts, "rstandard");
-
-     regressionPlots(d3.select("#regression3"), d3.select("#residuals3"),
-                     deepClone(pts), opts, "cooks");
-
-     regressionPlots(d3.select("#regression4"), d3.select("#residuals4"),
-                     deepClone(pts), opts, "leverage");
-
-     regressionPlots(d3.select("#regression5"), d3.select("#residuals5"),
-                     deepClone(pts), opts, "qqnorm");
+     regressionPlots(d3.select("#ans1reg5"), d3.select("#ans1qq"),
+                     deepClone(ans1), opts, [3,19], [13,3], "qqnorm");
     </script>
 
+    <p>
+      This data looks fairly normal&mdash;the sample size is small, so it can't
+      be expected to lie perfectly on the line. Try dragging data points around
+      to see what happens.
+    </p>
+    <p>
+      On the other hand, this data is hardly normal:
+    </p>
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>Q-Q plot</th>
+      </tr>
+      <tr>
+        <td id="ans3reg2"></td>
+        <td id="ans3qq"></td>
+      </tr>
+    </table>
+    <script>
+     regressionPlots(d3.select("#ans3reg2"), d3.select("#ans3qq"),
+                     deepClone(ans3), opts, [3,19], [13,3], "qqnorm");
+    </script>
+
+    <footer>
+      <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img
+      alt="Creative Commons License" style="border-width:0"
+      src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br /><span
+      xmlns:dct="http://purl.org/dc/terms/" property="dct:title">The
+      Regressomatic</span> by <a xmlns:cc="http://creativecommons.org/ns#"
+      href="http://www.refsmmat.com" property="cc:attributionName"
+      rel="cc:attributionURL">Alex Reinhart</a> is licensed under a <a
+      rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative
+        Commons Attribution 4.0 International License</a>.</p>
+
+      <p>The Regressomatic is <a
+      href="https://github.com/capnrefsmmat/regressomatic">open-source</a>. Its
+      code is available under the MIT license.</p>
+      
+    </footer>
   </body>
 </html>
