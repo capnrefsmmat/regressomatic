@@ -271,8 +271,10 @@
 
     <p>
       Quantile-quantile plots are a bit difficult to get intuition
-      about. They're designed to check if residuals are normally distributed. Of
-      course, once your dataset becomes large enough, normality isn't an
+      about. They're designed to check if <em>residuals</em> are normally
+      distributed. (The marginal distribution of the data doesn't
+      matter&mdash;we're interested only in the distribution of the residuals.)
+      Of course, once your dataset becomes large enough, normality isn't an
       important assumption&mdash;the linear regression estimators have
       asymptotically normal sampling distributions regardless, so you can do the
       standard tests on coefficients.
@@ -307,7 +309,7 @@
       to see what happens.
     </p>
     <p>
-      On the other hand, this data is hardly normal:
+      On the other hand, these residuals are hardly normal:
     </p>
     <table>
       <tr>
