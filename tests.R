@@ -9,6 +9,8 @@ resid(m)[c(1,5)]
 
 rstandard(m)[c(1,5)]
 
+rstudent(m)[c(1,5)]
+
 cooks.distance(m)[c(1,5)]
 
 lm.influence(m)$hat[c(1,5)]

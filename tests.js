@@ -34,6 +34,13 @@ QUnit.test("Standardized residuals", function(assert) {
     assert.close(resid[4], -0.66, 0.01, "residual 4");
 });
 
+QUnit.test("Studentized residuals", function(assert) {
+    var resid = regress(pts, 0, 100, "rstudent")[4];
+
+    assert.close(resid[0], -1.466, 0.01, "residual 0");
+    assert.close(resid[4], -0.632, 0.01, "residual 4");
+});
+
 QUnit.test("Cook's distances", function(assert) {
     var resid = regress(pts, 0, 100, "cooks")[4];
 

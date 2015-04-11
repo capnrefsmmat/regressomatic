@@ -188,6 +188,43 @@
                      "X1", "Y1");
     </script>
 
+    <h2>Studentized residuals</h2>
+
+    <p>
+      An alternate form of standardization leads to <em>Studentized</em>
+      residuals. These can be derived directly from the standardized residuals,
+      so they do not show any new information, but their interpretation is
+      clearer.
+    </p>
+
+    <p>
+      A Studentized residual can be seen as a <em>t</em> test of the null
+      hypothesis that the prediction for the given data point would not change
+      if the data point were left out of the fit. If the point is an outlier, we
+      can expect the test to reject the null.
+    </p>
+
+    <p>
+      Here are the Studentized residuals of the same dataset as before, for
+      comparison.
+    </p>
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>Studentized residuals</th>
+      </tr>
+      <tr>
+        <td id="ans1reg3"></td>
+
+        <td id="ans1student"></td>
+      </tr>
+    </table>
+    <script>
+     regressionPlots(d3.select("#ans1reg3"), d3.select("#ans1student"),
+                     deepClone(ans1), opts, [3,16], [13, 3], "rstudent",
+                     "X1", "Y1");
+    </script>
+
     <h2>Cook's distance</h2>
 
     <p>
@@ -205,13 +242,13 @@
         <th>Cook's distances</th>
       </tr>
       <tr>
-        <td id="ans1reg3"></td>
+        <td id="ans1reg4"></td>
 
         <td id="ans1cook"></td>
       </tr>
     </table>
     <script>
-     regressionPlots(d3.select("#ans1reg3"), d3.select("#ans1cook"),
+     regressionPlots(d3.select("#ans1reg4"), d3.select("#ans1cook"),
                      deepClone(ans1), opts, [3,16], [13, 3], "cooks",
                      "X1", "Y1");
     </script>
@@ -257,12 +294,12 @@
         <th>Leverage</th>
       </tr>
       <tr>
-        <td id="ans1reg4"></td>
+        <td id="ans1reg5"></td>
         <td id="ans1lev"></td>
       </tr>
     </table>
     <script>
-     regressionPlots(d3.select("#ans1reg4"), d3.select("#ans1lev"),
+     regressionPlots(d3.select("#ans1reg5"), d3.select("#ans1lev"),
                      deepClone(ans1), opts, [3,16], [13,3], "leverage",
                      "X1", "Y1");
     </script>
@@ -293,12 +330,12 @@
         <th>Q-Q plot</th>
       </tr>
       <tr>
-        <td id="ans1reg5"></td>
+        <td id="ans1reg6"></td>
         <td id="ans1qq"></td>
       </tr>
     </table>
     <script>
-     regressionPlots(d3.select("#ans1reg5"), d3.select("#ans1qq"),
+     regressionPlots(d3.select("#ans1reg6"), d3.select("#ans1qq"),
                      deepClone(ans1), opts, [3,16], [13,3], "qqnorm",
                      "X1", "Y1");
     </script>

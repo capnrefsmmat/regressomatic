@@ -5,6 +5,7 @@
 // diagnostic can be:
 // - "residuals" for ordinary residuals
 // - "rstandard" for standardized residuals
+// - "rstudent" for Studentized residuals
 // - "cooks" for Cook's distances
 // - "leverage" for leverage (diagonal of hat matrix)
 function regressionPlots(regression, resid, data, opts, xrange, yrange,
@@ -157,7 +158,8 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
                           .range([opts.padding, opts.height - opts.padding])
                           .nice();
         rxScale = xScale;
-    } else if (diagnostic === "rstandard" || diagnostic === "residuals") {
+    } else if (diagnostic === "rstandard" || diagnostic === "residuals" ||
+               diagnostic === "rstudent") {
         ryScale = d3.scale.linear()
                           .domain([residRange, -residRange])
                           .range([opts.padding, opts.height - opts.padding])
@@ -239,6 +241,8 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
         rylab = "Residuals";
     } else if (diagnostic === "rstandard") {
         rylab = "Standardized residuals";
+    } else if (diagnostic === "rstudent") {
+        rylab = "Studentized residuals";
     } else if (diagnostic === "cooks") {
         rylab = "Cook's distance";
     } else if (diagnostic === "leverage") {
@@ -309,6 +313,8 @@ function regress(data, minX, maxX, diagnostics) {
 
     if (diagnostics === "rstandard" || diagnostics === "qqnorm") {
         residuals = rstandard(residuals, hat);
+    } else if (diagnostics === "rstudent") {
+        residuals = studentize(rstandard(residuals, hat));
     } else if (diagnostics === "cooks") {
         residuals = cooks(rstandard(residuals, hat), hat);
     } else if (diagnostics === "leverage") {
@@ -322,6 +328,17 @@ function regress(data, minX, maxX, diagnostics) {
 // Estimate the residual variance. Argument should be a Vector.
 function sigmahat(residuals) {
     return residuals.dot(residuals) / (residuals.dimensions() - 2);
+}
+
+// Studentize residuals, following formula 9.4 of Applied Linear Regression
+// argument is a Vector
+function studentize(residuals) {
+    var n = residuals.dimensions();
+    var p = 2;
+
+    return residuals.map(function(r) {
+        return r * Math.sqrt((n - p - 1) / (n - p - Math.pow(r, 2)));
+    });
 }
 
 // Standardize the residuals. Pass residuals as a Vector and the hat matrix.
