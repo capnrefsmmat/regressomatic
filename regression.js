@@ -310,6 +310,7 @@ function regress(data, minX, maxX, diagnostics) {
     var slope = beta.e(2, 1);
 
     var residuals = Matrix.I(data.length).subtract(hat).multiply(Y).col(1);
+    var sigma2 = sigmahat(residuals);
 
     var RSS = residuals.dot(residuals);
     var mean_Y = d3.mean(Y.col(1).elements);
@@ -318,18 +319,20 @@ function regress(data, minX, maxX, diagnostics) {
     });
     var r2 = 1 - (RSS / SYY);
 
+    var F = (SYY - RSS) / sigma2;
+
     if (diagnostics === "rstandard" || diagnostics === "qqnorm") {
-        residuals = rstandard(residuals, hat);
+        residuals = rstandard(residuals, hat, sigma2);
     } else if (diagnostics === "rstudent") {
-        residuals = studentize(rstandard(residuals, hat));
+        residuals = studentize(rstandard(residuals, hat, sigma2));
     } else if (diagnostics === "cooks") {
-        residuals = cooks(rstandard(residuals, hat), hat);
+        residuals = cooks(rstandard(residuals, hat, sigma2), hat);
     } else if (diagnostics === "leverage") {
         residuals = leverage(hat);
     }
-    
+
     return [slope, intercept, intercept + slope * minX,
-            intercept + slope * maxX, residuals.elements, r2];
+            intercept + slope * maxX, residuals.elements, r2, F];
 }
 
 // Estimate the residual variance. Argument should be a Vector.
@@ -349,8 +352,7 @@ function studentize(residuals) {
 }
 
 // Standardize the residuals. Pass residuals as a Vector and the hat matrix.
-function rstandard(residuals, hat) {
-    var s2 = sigmahat(residuals);
+function rstandard(residuals, hat, s2) {
     return residuals.map(function(r, i) { 
         return r / Math.sqrt(s2 * (1 - hat.e(i, i))); 
     });

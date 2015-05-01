@@ -94,3 +94,9 @@ QUnit.test("R^2", function(assert) {
 
     assert.close(r2, 0.96437, 0.001);
 });
+
+QUnit.test("F statistic", function(assert) {
+    var F = regress(pts, 0, 100, "rstandard")[6];
+
+    assert.close(F, 189.4675, 0.001);
+});

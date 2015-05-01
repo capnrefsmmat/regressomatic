@@ -29,3 +29,6 @@ qqnorm(rstandard(m), plot.it=FALSE)$x
 
 # R^2
 summary(m)$r.squared
+
+# F test of coefficients
+summary(m)$fstatistic
