@@ -320,6 +320,7 @@ function regress(data, minX, maxX, diagnostics) {
     var r2 = 1 - (RSS / SYY);
 
     var F = (SYY - RSS) / sigma2;
+    var Fp = 1 - fcdf(F, 1, residuals.dimensions() - 2);
 
     if (diagnostics === "rstandard" || diagnostics === "qqnorm") {
         residuals = rstandard(residuals, hat, sigma2);
@@ -335,7 +336,7 @@ function regress(data, minX, maxX, diagnostics) {
             minY: intercept + slope * minX,
             maxY: intercept + slope * maxX,
             resids: residuals.elements,
-            r2: r2, F: F};
+            r2: r2, F: F, Fp: Fp};
 }
 
 // Estimate the residual variance. Argument should be a Vector.

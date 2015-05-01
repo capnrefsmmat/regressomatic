@@ -90,13 +90,20 @@ QUnit.test("QQNorm for residuals", function(assert) {
 });
 
 QUnit.test("R^2", function(assert) {
-    var r2 = regress(pts, 0, 100, "rstandard")[5];
+    var r2 = regress(pts, 0, 100, "rstandard").r2;
 
     assert.close(r2, 0.96437, 0.001);
 });
 
-QUnit.test("F statistic", function(assert) {
-    var F = regress(pts, 0, 100, "rstandard")[6];
+QUnit.test("F distribution", function(assert) {
+    assert.close(1 - fcdf(10, 1, 7), 0.0158778, 0.001);
+    assert.close(1 - fcdf(10, 4, 7), 0.005072761, 0.001);
+    assert.close(1 - fcdf(30, 1, 4), 0.005408479, 0.001);
+});
 
-    assert.close(F, 189.4675, 0.001);
+QUnit.test("F statistic", function(assert) {
+    var r = regress(pts, 0, 100, "rstandard");
+
+    assert.close(r.F, 189.4675, 0.001);
+    assert.close(r.Fp, 2.519807e-06, 1e-9);
 });

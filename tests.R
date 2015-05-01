@@ -32,3 +32,9 @@ summary(m)$r.squared
 
 # F test of coefficients
 summary(m)$fstatistic
+anova(m)[[1,"Pr(>F)"]]
+
+# F distribution tests
+pf(10, 1, 7, lower.tail=FALSE)
+pf(10, 4, 7, lower.tail=FALSE)
+pf(30, 1, 4, lower.tail=FALSE)
