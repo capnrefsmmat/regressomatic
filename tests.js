@@ -21,38 +21,47 @@ QUnit.test("Regression parameters", function(assert) {
 QUnit.test("Residuals", function(assert) {
     var resid = regress(pts, 0, 100, "residuals").resids;
 
-    // Check just a few of the residuals
-    assert.close(resid[0], -26.34, 0.1, "residual 0");
-    assert.close(resid[4], -14.13, 0.1, "residual 4");
+    var tr = [-26.341936, 24.072009, 22.733932, 9.375352, -14.128043,
+              1.610138, -30.045124, -11.955414, 24.679086];
+
+    resid.forEach(function(r, i) { assert.close(r, tr[i], 0.0001); });
 });
 
 QUnit.test("Standardized residuals", function(assert) {
     var resid = regress(pts, 0, 100, "rstandard").resids;
 
-    // Check just a few of the residuals
-    assert.close(resid[0], -1.359, 0.01, "residual 0");
-    assert.close(resid[4], -0.66, 0.01, "residual 4");
+    var rs = [-1.35870657, 1.10710724, 1.16188467, 0.45623499, -0.66111754,
+              0.08336545, -1.41670947, -0.59103025, 1.24558785];
+
+    resid.forEach(function(r, i) { assert.close(r, rs[i], 0.0001); });
 });
 
 QUnit.test("Studentized residuals", function(assert) {
     var resid = regress(pts, 0, 100, "rstudent").resids;
 
-    assert.close(resid[0], -1.466, 0.01, "residual 0");
-    assert.close(resid[4], -0.632, 0.01, "residual 4");
+    var rs = [-1.46599541, 1.12853526, 1.19732900, 0.42881521, -0.63212888,
+              0.07721975, -1.55302518, -0.56137388, 1.30710681];
+
+    resid.forEach(function(r, i) { assert.close(r, rs[i], 0.0001); });
 });
 
 QUnit.test("Cook's distances", function(assert) {
     var resid = regress(pts, 0, 100, "cooks").resids;
 
-    assert.close(resid[0], 0.387, 0.01, "Cook's distance 0");
-    assert.close(resid[4], 0.037, 0.01, "Cook's distance 4");
+    var cooks = [0.387248925, 0.078819617, 0.265738405, 0.027428980,
+                 0.036797217, 0.001495353, 0.186983985, 0.053097688,
+                 0.278641554];
+
+    resid.forEach(function(r, i) { assert.close(r, cooks[i], 0.0001); });
 });
 
 QUnit.test("Leverage", function(assert) {
     var resid = regress(pts, 0, 100, "leverage").resids;
 
-    assert.close(resid[0], 0.296, 0.01, "Leverage 0");
-    assert.close(resid[4], 0.144, 0.01, "Leverage 4");
+    var lev = [0.2955443, 0.1139567, 0.2824821, 0.2085788, 0.1441133,
+               0.3008606, 0.1570612, 0.2331340, 0.2642690];
+
+    resid.forEach(function(r, i) { assert.close(r, lev[i], 0.0001); });
 });
 
 QUnit.test("Probit function", function(assert) {

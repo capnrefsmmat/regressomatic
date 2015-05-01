@@ -5,15 +5,15 @@ m <- lm(y ~ x, data=data)
 
 coef(m)
 
-resid(m)[c(1,5)]
+resid(m)
 
-rstandard(m)[c(1,5)]
+rstandard(m)
 
-rstudent(m)[c(1,5)]
+rstudent(m)
 
-cooks.distance(m)[c(1,5)]
+cooks.distance(m)
 
-lm.influence(m)$hat[c(1,5)]
+lm.influence(m)$hat
 
 # Probit function
 qnorm(0.5)
