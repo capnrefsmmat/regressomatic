@@ -84,10 +84,10 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
         svg.select("line")
            .attr("x1", xScale(minX))
            .attr("x2", xScale(maxX))
-           .attr("y1", yScale(r[2]))
-           .attr("y2", yScale(r[3]));
+           .attr("y1", yScale(r.minY))
+           .attr("y2", yScale(r.maxY));
 
-        var residData = makeResidData(pts, r[4], diagnostic);
+        var residData = makeResidData(pts, r.resids, diagnostic);
 
         rsvg.selectAll("circle")
             .data(residData)
@@ -102,8 +102,8 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
     svg.append("line")
        .attr("x1", xScale(minX))
        .attr("x2", xScale(maxX))
-       .attr("y1", yScale(r[2]))
-       .attr("y2", yScale(r[3]))
+       .attr("y1", yScale(r.minY))
+       .attr("y2", yScale(r.maxY))
        .attr("class", "rline");
      
     svg.append("g")
@@ -151,7 +151,7 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
 
     // Now for residuals!
     var ryScale, rxScale;
-    var residRange = 1.5 * d3.max(r[4].map(Math.abs));
+    var residRange = 1.5 * d3.max(r.resids, Math.abs);
     if (diagnostic === "cooks" || diagnostic === "leverage") {
         ryScale = d3.scale.linear()
                           .domain([residRange, 0])
@@ -217,7 +217,7 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
             .attr("class", "rline");
     }
 
-    var residData = makeResidData(data, r[4], diagnostic);
+    var residData = makeResidData(data, r.resids, diagnostic);
 
     rsvg.append("g")
         .attr("id", "resids")
@@ -331,8 +331,11 @@ function regress(data, minX, maxX, diagnostics) {
         residuals = leverage(hat);
     }
 
-    return [slope, intercept, intercept + slope * minX,
-            intercept + slope * maxX, residuals.elements, r2, F];
+    return {slope: slope, intercept: intercept,
+            minY: intercept + slope * minX,
+            maxY: intercept + slope * maxX,
+            resids: residuals.elements,
+            r2: r2, F: F};
 }
 
 // Estimate the residual variance. Argument should be a Vector.

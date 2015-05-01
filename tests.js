@@ -13,13 +13,13 @@ var pts = [[30, 30],
 
 QUnit.test("Regression parameters", function(assert) {
     var r = regress(pts, 0, 100, false);
-    assert.close(r[0], 0.703, 0.1, "Slope");
+    assert.close(r.slope, 0.703, 0.1, "Slope");
 
-    assert.close(r[1], 35.24, 0.1, "Intercept");
+    assert.close(r.intercept, 35.24, 0.1, "Intercept");
 });
 
 QUnit.test("Residuals", function(assert) {
-    var resid = regress(pts, 0, 100, "residuals")[4];
+    var resid = regress(pts, 0, 100, "residuals").resids;
 
     // Check just a few of the residuals
     assert.close(resid[0], -26.34, 0.1, "residual 0");
@@ -27,7 +27,7 @@ QUnit.test("Residuals", function(assert) {
 });
 
 QUnit.test("Standardized residuals", function(assert) {
-    var resid = regress(pts, 0, 100, "rstandard")[4];
+    var resid = regress(pts, 0, 100, "rstandard").resids;
 
     // Check just a few of the residuals
     assert.close(resid[0], -1.359, 0.01, "residual 0");
@@ -35,21 +35,21 @@ QUnit.test("Standardized residuals", function(assert) {
 });
 
 QUnit.test("Studentized residuals", function(assert) {
-    var resid = regress(pts, 0, 100, "rstudent")[4];
+    var resid = regress(pts, 0, 100, "rstudent").resids;
 
     assert.close(resid[0], -1.466, 0.01, "residual 0");
     assert.close(resid[4], -0.632, 0.01, "residual 4");
 });
 
 QUnit.test("Cook's distances", function(assert) {
-    var resid = regress(pts, 0, 100, "cooks")[4];
+    var resid = regress(pts, 0, 100, "cooks").resids;
 
     assert.close(resid[0], 0.387, 0.01, "Cook's distance 0");
     assert.close(resid[4], 0.037, 0.01, "Cook's distance 4");
 });
 
 QUnit.test("Leverage", function(assert) {
-    var resid = regress(pts, 0, 100, "leverage")[4];
+    var resid = regress(pts, 0, 100, "leverage").resids;
 
     assert.close(resid[0], 0.296, 0.01, "Leverage 0");
     assert.close(resid[4], 0.144, 0.01, "Leverage 4");
@@ -80,7 +80,7 @@ QUnit.test("Array ordering", function(assert) {
 });
 
 QUnit.test("QQNorm for residuals", function(assert) {
-    var resids = regress(pts, 0, 100, "rstandard")[4];
+    var resids = regress(pts, 0, 100, "rstandard").resids;
     var d = makeResidData(pts, resids, "qqnorm");
 
     var out = [-0.9319713, 0.5716375, 0.9319713, 0.2743915, -0.5716375,
