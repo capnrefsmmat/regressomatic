@@ -5,6 +5,8 @@
  * https://github.com/jstat/jstat
  */
 
+"use strict";
+
 function fcdf(x, df1, df2) {
     return ibeta((df1 * x) / (df1 * x + df2), df1 / 2, df2 / 2);
 }
