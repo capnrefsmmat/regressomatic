@@ -26,3 +26,6 @@ qnorm(ppoints(9)[4])
 
 # makeResidData for qqnorm
 qqnorm(rstandard(m), plot.it=FALSE)$x
+
+# R^2
+summary(m)$r.squared

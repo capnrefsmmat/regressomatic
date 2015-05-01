@@ -311,6 +311,13 @@ function regress(data, minX, maxX, diagnostics) {
 
     var residuals = Matrix.I(data.length).subtract(hat).multiply(Y).col(1);
 
+    var RSS = residuals.dot(residuals);
+    var mean_Y = d3.mean(Y.col(1).elements);
+    var SYY = d3.sum(Y.col(1).elements, function(yi) {
+        return Math.pow(yi - mean_Y, 2);
+    });
+    var r2 = 1 - (RSS / SYY);
+
     if (diagnostics === "rstandard" || diagnostics === "qqnorm") {
         residuals = rstandard(residuals, hat);
     } else if (diagnostics === "rstudent") {
@@ -322,7 +329,7 @@ function regress(data, minX, maxX, diagnostics) {
     }
     
     return [slope, intercept, intercept + slope * minX,
-            intercept + slope * maxX, residuals.elements];
+            intercept + slope * maxX, residuals.elements, r2];
 }
 
 // Estimate the residual variance. Argument should be a Vector.

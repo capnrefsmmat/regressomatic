@@ -88,3 +88,9 @@ QUnit.test("QQNorm for residuals", function(assert) {
 
     d.forEach(function(r, i) { assert.close(r[0], out[i], 0.001); });
 });
+
+QUnit.test("R^2", function(assert) {
+    var r2 = regress(pts, 0, 100, "rstandard")[5];
+
+    assert.close(r2, 0.96437, 0.001);
+});
