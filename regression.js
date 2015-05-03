@@ -8,10 +8,19 @@
 // - "rstudent" for Studentized residuals
 // - "cooks" for Cook's distances
 // - "leverage" for leverage (diagonal of hat matrix)
+// - "qqnorm" for normal quantile-quantile plot of residuals
+// stats is an object giving d3 selections of elements which should be filled
+// with F test statistics, p values, and so on. Elements can be left null if
+// the statistic need not be reported.
 function regressionPlots(regression, resid, data, opts, xrange, yrange,
-                         diagnostic, xlab, ylab) {
+                         diagnostic, xlab, ylab, stats) {
     xlab = xlab || "";
     ylab = ylab || "";
+    stats = stats || {};
+
+    // Reset regression and resid in case they currently have any content.
+    regression.text("");
+    resid.text("");
 
     // Scales
     var xScale = d3.scale.linear()
@@ -32,7 +41,7 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
 
     var minX = xScale.invert(opts.padding);
     var maxX = xScale.invert(opts.width - opts.padding);
-    
+
     var svg = regression.append("svg")
                         .attr("width", opts.width)
                         .attr("height", opts.height);
@@ -66,21 +75,22 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
           .attr("r", opts.ptRadius)
           .attr("fill", opts.ptColor);
     };
-     
+
     function dragmove(d, i) {
         var mx = d3.event.x;
         var my = d3.event.y;
 
         d[0] = boundBetween(xScale.invert(mx), xrange[0], xrange[1]);
         d[1] = boundBetween(yScale.invert(my), yrange[1], yrange[0]);
-       
+
         d3.select(this)
           .attr("cx", xScale(d[0]))
           .attr("cy", yScale(d[1]));
 
-        var pts = regression.selectAll("circle").data();        
+        var pts = regression.selectAll("circle").data();
         var r = regress(pts, minX, maxX, diagnostic);
-       
+        setStats(r);
+
         svg.select("line")
            .attr("x1", xScale(minX))
            .attr("x2", xScale(maxX))
@@ -95,17 +105,39 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
             .attr("cy", function(d) { return ryScale(d[1]); });
     }
 
+    function setStats(r) {
+        if (stats.r2 !== undefined) {
+            stats.r2.text(r.r2.toPrecision(2));
+        }
+        if (stats.fstat !== undefined) {
+            stats.fstat.text(r.F.toPrecision(3));
+        }
+        if (stats.fdf2 !== undefined) {
+            stats.fdf2.text(data.length - 2);
+        }
+        if (stats.p !== undefined && stats.pdir !== undefined) {
+            if (r.Fp <= 0.001) {
+                stats.p.text("0.001");
+                stats.pdir.text("<");
+            } else {
+                stats.p.text(r.Fp.toPrecision(2));
+                stats.pdir.text("=");
+            }
+        }
+    }
+
     // Draw data
     var r = regress(data, xScale.invert(opts.padding),
                     xScale.invert(opts.width - opts.padding), diagnostic);
-    
+    setStats(r);
+
     svg.append("line")
        .attr("x1", xScale(minX))
        .attr("x2", xScale(maxX))
        .attr("y1", yScale(r.minY))
        .attr("y2", yScale(r.maxY))
        .attr("class", "rline");
-     
+
     svg.append("g")
        .attr("id", "data")
        .selectAll("circle")
@@ -297,7 +329,7 @@ function deepClone(arr) {
 
 function regress(data, minX, maxX, diagnostics) {
     diagnostics = diagnostics || "residuals";
-    
+
     var X = ones(data.length).augment($M(data).col(1));
     var Y = $M(data).minor(1, 2, data.length, 1);
 
@@ -357,8 +389,8 @@ function studentize(residuals) {
 
 // Standardize the residuals. Pass residuals as a Vector and the hat matrix.
 function rstandard(residuals, hat, s2) {
-    return residuals.map(function(r, i) { 
-        return r / Math.sqrt(s2 * (1 - hat.e(i, i))); 
+    return residuals.map(function(r, i) {
+        return r / Math.sqrt(s2 * (1 - hat.e(i, i)));
     });
 }
 

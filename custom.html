@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>The Regressomatic 4000</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="regression.css">
+    <script src="sylvester/sylvester.js"></script>
+    <script src="distributions.js"></script>
+    <script src="regression.js"></script>
+    <script src="custom.js"></script>
+  </head>
+  <body>
+    <h1>The Regressomatic 4000</h1>
+    <table>
+      <tr>
+        <th>Regression</th>
+        <th>
+          <select name="diagnostic" id="diagnostic" required>
+            <option value="residuals" selected>Residuals</option>
+            <option value="rstandard">Standardized residuals</option>
+            <option value="rstudent">Studentized residuals</option>
+            <option value="cooks">Cook's distances</option>
+            <option value="leverage">Leverage</option>
+            <option value="qqnorm">Q-Q plot</option>
+          </select>
+        </th>
+      </tr>
+      <tr>
+        <td id="reg"></td>
+
+        <td id="resid"></td>
+      </tr>
+      <tr>
+        <td>
+          R<sup>2</sup> = <span id="r2"></span>.
+          F<sub>1,<span id="fdf2"></span></sub> =
+          <span id="fstat"></span>,
+          p <span id="pdir">=</span> <span id="pval"></span>.
+        </td>
+
+        <td>
+          Select dataset:
+          <select name="dataset" required id="dataset">
+            <option value="anscombe1" selected>Anscombe 1</option>
+            <option value="anscombe2">Anscombe 2</option>
+            <option value="anscombe3">Anscombe 3</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+
+    <script>
+     // Plot styles
+     var opts = {
+       width: 390,
+       height: 350,
+       padding: 40,
+
+       ptRadius: 5,
+       hoverRadius: 8,
+
+       ptColor: "#FFA500",
+       ptBorderColor: "#F00",
+       hoverColor: "#FF4800"
+     };
+
+     d3.select("#dataset").on("change", dataCallback(opts));
+     d3.select("#diagnostic").on("change", diagnosticCallback(opts));
+     dataCallback(opts).call(d3.select("#dataset")[0][0]);
+    </script>
+    
+    <footer>
+      <p>The Regressomatic is <a
+      href="https://github.com/capnrefsmmat/regressomatic">open-source</a>. Its
+      code is available under the MIT license.</p>
+    </footer>
+  </body>
+</html>
