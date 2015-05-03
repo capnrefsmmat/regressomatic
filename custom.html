@@ -46,9 +46,19 @@
             <option value="anscombe2">Anscombe 2</option>
             <option value="anscombe3">Anscombe 3</option>
             <option value="bacteria">Bacteria survival</option>
-            <option value="logbacteria">Log bacteria survival</option>
           </select>
         </td>
+
+        <tr>
+          <td>
+            <label id="logxlab">
+              <input type="checkbox" name="logx" id="logx">log X
+            </label>
+            <label id="logylab">
+              <input type="checkbox" name="logy" id="logy">log Y
+            </label>
+          </td>
+          <td></td>
       </tr>
     </table>
 
@@ -69,6 +79,8 @@
 
      d3.select("#dataset").on("change", dataCallback(opts));
      d3.select("#diagnostic").on("change", diagnosticCallback(opts));
+     d3.select("#logx").on("change", logCallback(opts));
+     d3.select("#logy").on("change", logCallback(opts));
      dataCallback(opts).call(d3.select("#dataset")[0][0]);
     </script>
     

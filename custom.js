@@ -2,6 +2,10 @@
 
 function dataCallback(opts) {
     return function() {
+        d3.select("#logx").property("checked", false);
+        d3.select("#reg").property("xlogged", false);
+        d3.select("#logy").property("checked", false);
+        d3.select("#reg").property("ylogged", false);
         loadData(this.value, d3.select("#diagnostic").property("value"), opts);
     };
 }
@@ -10,6 +14,13 @@ function diagnosticCallback(opts) {
     return function() {
         plot(d3.selectAll("#reg circle").data(),
              d3.select("#diagnostic").property("value"), opts);
+    };
+}
+
+function logCallback(opts) {
+    return function() {
+        plot(d3.selectAll("#reg circle").data(),
+             d3.select("#diagnostic").property("value"), opts, true);
     };
 }
 
@@ -25,6 +36,7 @@ function makePlotCallback(diagnostic, opts) {
         var data = d3.csv.parseRows(text, function(row) {
             return [+row[0], +row[1]];
         });
+
         plot(data, diagnostic, opts, true);
     };
 }
@@ -36,20 +48,57 @@ function plot(data, diagnostic, opts, reset) {
     var reg = d3.select("#reg");
     var resid = d3.select("#resid");
 
+    if (d3.select("#logx").property("checked") && !reg.property("xlogged")) {
+        data = data.map(function(row) {
+            return [Math.log(row[0]), row[1]];
+        });
+        reg.property("xlogged", true);
+    } else if (!d3.select("#logx").property("checked")
+               && reg.property("xlogged")) {
+        data = data.map(function(row) {
+            return [Math.exp(row[0]), row[1]];
+        });
+        reg.property("xlogged", false);
+    }
+    if (d3.select("#logy").property("checked") && !reg.property("ylogged")) {
+        data = data.map(function(row) {
+            return [row[0], Math.log(row[1])];
+        });
+        reg.property("ylogged", true);
+    } else if (!d3.select("#logy").property("checked")
+               && reg.property("ylogged")) {
+        data = data.map(function(row) {
+            return [row[0], Math.exp(row[1])];
+        });
+        reg.property("ylogged", false);
+    }
     var xrange, yrange;
 
     if (reset || reg.property("xrange") === undefined) {
-        var xmin = d3.min(data, function(row) { return row[0]; });
-        var xmax = d3.max(data, function(row) { return row[0]; });
+        xrange = d3.extent(data, function(row) { return row[0]; });
+        yrange = d3.extent(data, function(row) { return row[1]; });
 
-        var ymin = d3.min(data, function(row) { return row[1]; });
-        var ymax = d3.max(data, function(row) { return row[1]; });
+        // Only allow log scale if all observations have the same sign
+        if (yrange[0] * yrange[1] <= 0 && !reg.property("ylogged")) {
+            d3.select("#logy").property("disabled", true);
+            d3.select("#logylab").attr("class", "disable");
+        } else {
+            d3.select("#logy").property("disabled", false);
+            d3.select("#logylab").attr("class", "");
+        }
+        if (xrange[0] * xrange[1] <= 0 && !reg.property("xlogged")) {
+            d3.select("#logx").property("disabled", true);
+            d3.select("#logxlab").attr("class", "disable");
+        } else {
+            d3.select("#logx").property("disabled", false);
+            d3.select("#logxlab").attr("class", "");
+        }
 
-        var xwidth = xmax - xmin;
-        var ywidth = ymax - ymin;
+        var xwidth = xrange[1] - xrange[0];
+        var ywidth = yrange[1] - yrange[0];
 
-        xrange = [xmin - 0.1*xwidth, xmax + 0.1*xwidth];
-        yrange = [ymax + 0.1*ywidth, ymin - 0.1*ywidth];
+        xrange = [xrange[0] - 0.1*xwidth, xrange[1] + 0.1*xwidth];
+        yrange = [yrange[1] + 0.1*ywidth, yrange[0] - 0.1*ywidth];
 
         reg.property("xrange", xrange);
         reg.property("yrange", yrange);
