@@ -78,15 +78,15 @@ function plot(data, diagnostic, opts, reset) {
         xrange = d3.extent(data, function(row) { return row[0]; });
         yrange = d3.extent(data, function(row) { return row[1]; });
 
-        // Only allow log scale if all observations have the same sign
-        if (yrange[0] * yrange[1] <= 0 && !reg.property("ylogged")) {
+        // Only allow log scale if all observations are positive
+        if (yrange[0] <= 0 && !reg.property("ylogged")) {
             d3.select("#logy").property("disabled", true);
             d3.select("#logylab").attr("class", "disable");
         } else {
             d3.select("#logy").property("disabled", false);
             d3.select("#logylab").attr("class", "");
         }
-        if (xrange[0] * xrange[1] <= 0 && !reg.property("xlogged")) {
+        if (xrange[0] <= 0 && !reg.property("xlogged")) {
             d3.select("#logx").property("disabled", true);
             d3.select("#logxlab").attr("class", "disable");
         } else {
