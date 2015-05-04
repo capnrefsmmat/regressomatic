@@ -186,8 +186,11 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
     var ryScale, rxScale;
     var residRange = 1.5 * d3.max(r.resids, Math.abs);
     if (diagnostic === "cooks" || diagnostic === "leverage") {
+        // Leverage is bounded between 0 and 1, and 1 is a common cutoff for
+        // outlying points when using Cook's distance, so make sure the scale
+        // includes [0,1].
         ryScale = d3.scale.linear()
-                          .domain([residRange, 0])
+                          .domain([Math.max(1, residRange), 0])
                           .range([opts.padding, opts.height - opts.padding])
                           .nice();
         rxScale = xScale;
