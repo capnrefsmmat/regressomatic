@@ -110,7 +110,8 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
             stats.r2.text(r.r2.toPrecision(2));
         }
         if (stats.fstat !== undefined) {
-            stats.fstat.text(r.F.toPrecision(3));
+            stats.fstat.text(r.F.toLocaleString("en-US",
+                                                {maximumSignificantDigits: 4}));
         }
         if (stats.fdf2 !== undefined) {
             stats.fdf2.text(data.length - 2);
