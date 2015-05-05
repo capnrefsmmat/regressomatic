@@ -13,9 +13,9 @@ var pts = [[30, 30],
 
 QUnit.test("Regression parameters", function(assert) {
     var r = regress(pts, 0, 100, false);
-    assert.close(r.slope, 0.703, 0.1, "Slope");
+    assert.close(r.slope, 0.7034474, 0.0001, "Slope");
 
-    assert.close(r.intercept, 35.24, 0.1, "Intercept");
+    assert.close(r.intercept, 35.2385151, 0.0001, "Intercept");
 });
 
 QUnit.test("Residuals", function(assert) {
@@ -105,14 +105,14 @@ QUnit.test("R^2", function(assert) {
 });
 
 QUnit.test("F distribution", function(assert) {
-    assert.close(1 - fcdf(10, 1, 7), 0.0158778, 0.001);
-    assert.close(1 - fcdf(10, 4, 7), 0.005072761, 0.001);
-    assert.close(1 - fcdf(30, 1, 4), 0.005408479, 0.001);
+    assert.close(1 - fcdf(10, 1, 7), 0.0158778, 0.0001);
+    assert.close(1 - fcdf(10, 4, 7), 0.005072761, 0.0001);
+    assert.close(1 - fcdf(30, 1, 4), 0.005408479, 0.0001);
 });
 
 QUnit.test("F statistic", function(assert) {
     var r = regress(pts, 0, 100, "rstandard");
 
-    assert.close(r.F, 189.4675, 0.001);
+    assert.close(r.F, 189.4675, 0.0001);
     assert.close(r.Fp, 2.519807e-06, 1e-9);
 });
