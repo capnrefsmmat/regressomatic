@@ -107,8 +107,8 @@ function plot(data, diagnostic, opts, reset) {
         yrange = reg.property("yrange");
     }
 
-    regressionPlots(d3.select("#reg"), d3.select("#resid"), data, opts,
-                    xrange, yrange, diagnostic, "X", "Y",
+    regressionPlots(reg, resid, data, opts, xrange, yrange, diagnostic,
+                    "X", "Y",
                    {r2: d3.select("#r2"),
                     fdf2: d3.select("#fdf2"), fstat: d3.select("#fstat"),
                     p: d3.select("#pval"), pdir: d3.select("#pdir")});
