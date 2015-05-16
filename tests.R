@@ -38,3 +38,8 @@ anova(m)[[1,"Pr(>F)"]]
 pf(10, 1, 7, lower.tail=FALSE)
 pf(10, 4, 7, lower.tail=FALSE)
 pf(30, 1, 4, lower.tail=FALSE)
+
+# t quantiles
+qt(0.95, 7)
+qt(0.01, 4)
+qt(0.99, 24)

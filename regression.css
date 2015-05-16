@@ -32,6 +32,10 @@ table {
     stroke-width: 1px;
 }
 
+.dashed {
+    stroke-dasharray: 5,5;
+}
+
 figure {
     width: 80%;
     margin-left: auto;

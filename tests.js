@@ -116,3 +116,9 @@ QUnit.test("F statistic", function(assert) {
     assert.close(r.F, 189.4675, 0.0001);
     assert.close(r.Fp, 2.519807e-06, 1e-9);
 });
+
+QUnit.test("t quantiles", function(assert) {
+    assert.close(qt(0.95, 7), 1.894579, 0.0001);
+    assert.close(qt(0.01, 4), -3.746947, 0.0001);
+    assert.close(qt(0.99, 24), 2.492159, 0.0001);
+});

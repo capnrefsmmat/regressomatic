@@ -252,6 +252,23 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
             .attr("y2", ryScale(3))
             .attr("class", "rline");
     }
+    if (diagnostic === "rstudent") {
+        // Add outlier test lines.
+        var outline = outlierLine(data.length);
+        rsvg.append("line")
+            .attr("x1", rxScale(minX))
+            .attr("x2", rxScale(maxX))
+            .attr("y1", ryScale(outline))
+            .attr("y2", ryScale(outline))
+            .attr("class", "rline dashed");
+
+        rsvg.append("line")
+            .attr("x1", rxScale(minX))
+            .attr("x2", rxScale(maxX))
+            .attr("y1", ryScale(-outline))
+            .attr("y2", ryScale(-outline))
+            .attr("class", "rline dashed");
+    }
 
     var residData = makeResidData(data, r.resids, diagnostic);
 
@@ -409,6 +426,13 @@ function cooks(residuals, hat) {
 // Extract the leverage from the hat matrix, returning a Vector.
 function leverage(hat) {
     return hat.diagonal();
+}
+
+// Calculates the position of the Bonferroni-corrected outlier threshold for
+// Studentized residuals.
+function outlierLine(n) {
+    var dof = n - 3; // 3 = p' + 1, where p' = 2, for slope + intercept
+    return qt(1 - (0.05/n), dof);
 }
 
 // The standard normal inverse cdf.
