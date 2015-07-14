@@ -11,16 +11,11 @@ function dataCallback(opts) {
 }
 
 function diagnosticCallback(opts) {
+    var reg = d3.select("#reg");
     return function() {
         plot(d3.selectAll("#reg circle").data(),
-             d3.select("#diagnostic").property("value"), opts);
-    };
-}
-
-function logCallback(opts) {
-    return function() {
-        plot(d3.selectAll("#reg circle").data(),
-             d3.select("#diagnostic").property("value"), opts, true);
+             d3.select("#diagnostic").property("value"), opts,
+             reg.property("xlab"), reg.property("ylab"), true);
     };
 }
 
@@ -33,16 +28,25 @@ function loadData(name, diagnostic, opts) {
 
 function makePlotCallback(diagnostic, opts) {
     return function(text) {
-        var data = d3.csv.parseRows(text, function(row) {
+        var data = d3.csv.parseRows(text);
+
+        var names = data.shift();
+
+        var reg = d3.select("#reg");
+
+        reg.property("xlab", names[0]);
+        reg.property("ylab", names[1]);
+
+        data = data.map(function(row) {
             return [+row[0], +row[1]];
         });
 
-        plot(data, diagnostic, opts, true);
+        plot(data, diagnostic, opts, names[0], names[1], true);
     };
 }
 
 // if reset is true, recalculate the x and y range
-function plot(data, diagnostic, opts, reset) {
+function plot(data, diagnostic, opts, xlab, ylab, reset) {
     reset = reset || false;
 
     var reg = d3.select("#reg");
@@ -71,6 +75,13 @@ function plot(data, diagnostic, opts, reset) {
             return [row[0], Math.exp(row[1])];
         });
         reg.property("ylogged", false);
+    }
+
+    if (reg.property("xlogged")) {
+        xlab = "log(" + xlab + ")";
+    }
+    if (reg.property("ylogged")) {
+        ylab = "log(" + ylab + ")";
     }
     var xrange, yrange;
 
@@ -108,7 +119,7 @@ function plot(data, diagnostic, opts, reset) {
     }
 
     regressionPlots(reg, resid, data, opts, xrange, yrange, diagnostic,
-                    "X", "Y",
+                    xlab, ylab,
                    {r2: d3.select("#r2"),
                     fdf2: d3.select("#fdf2"), fstat: d3.select("#fstat"),
                     p: d3.select("#pval"), pdir: d3.select("#pdir")});

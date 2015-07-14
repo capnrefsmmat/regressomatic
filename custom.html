@@ -79,8 +79,8 @@
 
      d3.select("#dataset").on("change", dataCallback(opts));
      d3.select("#diagnostic").on("change", diagnosticCallback(opts));
-     d3.select("#logx").on("change", logCallback(opts));
-     d3.select("#logy").on("change", logCallback(opts));
+     d3.select("#logx").on("change", diagnosticCallback(opts));
+     d3.select("#logy").on("change", diagnosticCallback(opts));
      dataCallback(opts).call(d3.select("#dataset")[0][0]);
     </script>
     
