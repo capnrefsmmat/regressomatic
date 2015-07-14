@@ -27,6 +27,10 @@ table {
     margin-right: auto;
 }
 
+td.output {
+    font-size: 80%;
+}
+
 .rline {
     stroke: blue;
     stroke-width: 1px;

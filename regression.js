@@ -125,6 +125,14 @@ function regressionPlots(regression, resid, data, opts, xrange, yrange,
                 stats.pdir.text("=");
             }
         }
+        if (stats.intercept !== undefined) {
+            stats.intercept.text(r.intercept.toLocaleString("en-US",
+                                                           {maximumSignificantDigits: 3}));
+        }
+        if (stats.slope !== undefined) {
+            stats.slope.text(r.slope.toLocaleString("en-US",
+                                                    {maximumSignificantDigits: 3}));
+        }
     }
 
     // Draw data

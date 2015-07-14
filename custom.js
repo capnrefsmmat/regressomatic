@@ -118,9 +118,14 @@ function plot(data, diagnostic, opts, xlab, ylab, reset) {
         yrange = reg.property("yrange");
     }
 
+    d3.select("#dependent").text(ylab);
+    d3.select("#independent").text(xlab);
+
     regressionPlots(reg, resid, data, opts, xrange, yrange, diagnostic,
                     xlab, ylab,
                    {r2: d3.select("#r2"),
                     fdf2: d3.select("#fdf2"), fstat: d3.select("#fstat"),
-                    p: d3.select("#pval"), pdir: d3.select("#pdir")});
+                    p: d3.select("#pval"), pdir: d3.select("#pdir"),
+                    slope: d3.select("#slope"),
+                    intercept: d3.select("#intercept")});
 }
